@@ -28,8 +28,8 @@ var controller3 = TextEditingController();
 // ignore: must_be_immutable
 class ShipperHomeScreen extends StatefulWidget {
   User user;
-  String userCity ='';
-  ShipperHomeScreen({this.user, this.userCity});
+
+  ShipperHomeScreen({this.user,});
   @override
   _ShipperHomeScreenState createState() => _ShipperHomeScreenState();
 }
@@ -45,7 +45,7 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
 
-  Future<CardsModal> createCardOnApi() async {
+  Future<CardsModal> submitOnLoadApiAndClear() async {
     Map data = {
       "loadingPoint": Provider.of<NewDataByShipper>(context, listen: false).loadingPoint,
       "unloadingPoint": Provider.of<NewDataByShipper>(context, listen: false).unloadingPoint,
@@ -66,9 +66,10 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
     ProductTypeWidgetScreen().clear_all();
     TruckTypeWidgetScreen().clear_all();
     WeightWidgetScreen().clear_all();
-    controller1.clear();
     controller2.clear();
     controller3.clear();
+    controller1 = TextEditingController(text: city);
+    Provider.of<NewDataByShipper>(context,listen: false).updateLoadingPoint(newValue: city);
     print(response.statusCode);
     if (response.statusCode == 200) {
       final String responseString = response.body;
@@ -88,7 +89,7 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
     }
   }
 
-  Future<List<CardsModal>> getCardsData() async {
+  Future<List<CardsModal>> getDataFromLoadApi() async {
     var jsonData;
     http.Response response = await http.get("http://ec2-52-53-40-46.us-west-1.compute.amazonaws.com:8080/load");
     jsonData = await jsonDecode(response.body);
@@ -111,7 +112,7 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
 
   void getCurrentLocation() async {
 
-    if (city == ''){
+
     PermissionStatus permission1 =
         await LocationPermissions().checkPermissionStatus();
     if (permission1 != PermissionStatus.granted){
@@ -144,10 +145,7 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
     controller1 = TextEditingController(text: city);
     Provider.of<NewDataByShipper>(context,listen: false).updateLoadingPoint(newValue: city);
   }
-  else { city = widget.userCity;
-  controller1 = TextEditingController(text: city);
-    Provider.of<NewDataByShipper>(context,listen: false).updateLoadingPoint(newValue: city);}
-  }
+
 
   @override
   void initState() {
@@ -270,11 +268,6 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
                                 _controller.jumpToPage(0);
                               },
                               child: Text('HOME', style: TextStyle(fontSize: 15, color: Colors.white),),
-                              // child: Icon(
-                              //   Icons.home,
-                              //   size: 40,
-                              //   color: currentPage == 0 ? Colors.blue: Colors.black,
-                              // ),
                             ),
                           ),
                           SizedBox(width: 30,),
@@ -289,11 +282,6 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
                                 _controller.jumpToPage(1);
                               },
                               child: Text('ADD LOAD', style: TextStyle(fontSize: 15, color: Colors.white),),
-                              // child: Icon(
-                              //   Icons.add,
-                              //   color: currentPage == 1 ? Colors.blue: Colors.black,
-                              //   size: 40,
-                              // ),
                             ),
                           ),
                           SizedBox(width: 30,),
@@ -308,11 +296,6 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
                               _controller.jumpToPage(2);
                             },
                               child: Text('LIST', style: TextStyle(fontSize: 15, color: Colors.white),),
-                              // child: Icon(
-                            //   Icons.list,
-                            //   color: currentPage == 2 ? Colors.blue: Colors.black,
-                            //   size: 40,
-                            // ),
                           ),
                           ),
                         ],
@@ -324,9 +307,8 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
               Expanded(
                 child: PageView(
                   onPageChanged: (val) {
-                    setState(() {
-                      currentPage = val;
-                    });
+                    setState((){
+                      currentPage = val;});
                   },
                   controller: _controller,
                   children: [
@@ -695,7 +677,7 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
                                       Provider.of<NewDataByShipper>(context, listen: false).updateIsCommentsEmpty(newValue: true);
                                     }
                                     try {
-                                      final createdCard = await createCardOnApi();
+                                      final createdCard = await submitOnLoadApiAndClear();
                                       setState(() {
                                         _controller.jumpToPage(2);
                                       });
@@ -723,7 +705,7 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
                             children: [
                               Expanded(
                                 child: FutureBuilder(
-                                    future: getCardsData(),
+                                    future: getDataFromLoadApi(),
                                     builder: (BuildContext context, AsyncSnapshot snapshot) {
                                       if (snapshot.data == null) {
                                         return Container(

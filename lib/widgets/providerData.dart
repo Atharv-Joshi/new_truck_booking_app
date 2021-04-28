@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 
+import 'backend_connection.dart';
+
 class NewDataByShipper extends ChangeNotifier {
   String loadingPoint;
   String unloadingPoint;
@@ -10,11 +12,11 @@ class NewDataByShipper extends ChangeNotifier {
   bool isPending = true;
   String comments;
   bool isCommentsEmpty = true;
-  List listOfShippers = [];
-
-  void addShipper({String newValue}) {
-    listOfShippers.add(newValue);
-    print(newValue);
+  GpsDataModel gpsData = new GpsDataModel();
+  void updateGpsData(GpsDataModel newValue){
+    gpsData = newValue;
+    print(gpsData);
+    print("reached Provider");
     notifyListeners();
   }
   void updateLoadingPoint({String newValue}) {

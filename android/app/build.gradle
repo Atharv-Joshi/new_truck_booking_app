@@ -13,12 +13,12 @@ if (flutterRoot == null) {
 
 def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
 if (flutterVersionCode == null) {
-    flutterVersionCode = '102'
+    flutterVersionCode = '104'
 }
 
 def flutterVersionName = localProperties.getProperty('flutter.versionName')
 if (flutterVersionName == null) {
-    flutterVersionName = '1.0.2'
+    flutterVersionName = '1.0.4'
 }
 
 apply plugin: 'com.android.application'
@@ -43,8 +43,8 @@ android {
         applicationId "com.chirag4601.new_truck_booking_app"
         minSdkVersion 16
         targetSdkVersion 29
-        versionCode 102
-        versionName "1.0.2"
+        versionCode 104
+        versionName "1.0.4"
         multiDexEnabled true
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }

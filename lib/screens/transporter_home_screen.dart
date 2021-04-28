@@ -1,5 +1,6 @@
 import 'package:Liveasy/screens/choice_screen.dart';
 import 'package:Liveasy/screens/transporter_showMapUsingImei.dart';
+import 'package:Liveasy/widgets/providerData.dart';
 import 'package:Liveasy/widgets/truckDetailsCardGenerator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:Liveasy/widgets/backend_connection.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:location_permissions/location_permissions.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:provider/provider.dart';
 
 var controller1 = TextEditingController();
 var controller2 = TextEditingController();
@@ -18,28 +22,32 @@ String unloadingPoint = '';
 String apikey = 'AIzaSyCI8bvNwE05B7Cp03Rvc-QsMX9QjY-EsS4';
 class TsHomeScreen extends StatefulWidget {
   User user;
-  String userCity ='';
-  TsHomeScreen({this.user, this.userCity});
+
+  TsHomeScreen({this.user});
   @override
   _TsHomeScreenState createState() => _TsHomeScreenState();
 }
 
 class _TsHomeScreenState extends State<TsHomeScreen> {
+   Position userLocation;
+   bool showModalProgressHUD = false;
+  getUserLocation()async{
+    PermissionStatus permission = await LocationPermissions().checkPermissionStatus();
+    if (permission == PermissionStatus.granted){
+      userLocation = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      print(userLocation);
+    }
+  }
   String city = '';
   PageController _controller = PageController(initialPage: 0,);
   void getCurrentLocation() async {
+        PermissionStatus permission = await LocationPermissions().checkPermissionStatus();
+        if (permission == PermissionStatus.granted){
+          userLocation = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+        }
 
-    if (widget.userCity == '' || widget.userCity == null){
-
-      // PermissionStatus permission =
-      //     await LocationPermissions().requestPermissions();
-      // PermissionStatus permission1 =
-      // await LocationPermissions().checkPermissionStatus();
-      // print(permission1);
-      // // print(permission);
-      //
       // var position = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-      // print(position);
+
       // final coordinates = new Coordinates(position.latitude, position.longitude);
       // var addresses =
       // await Geocoder.local.findAddressesFromCoordinates(coordinates);
@@ -59,16 +67,14 @@ class _TsHomeScreenState extends State<TsHomeScreen> {
       // var cityName = adress["copResults"]["city"];
       // var stateName = adress["copResults"]["state"];
       // city = '$cityName ($stateName)';
-      city = 'UserCity';
+        city = "UserCity";
       print(city);
-      // // http.Response response1 = await http.get('https://atlas.mapmyindia.com/api/places/search/json?query=alwar',
-      // //   headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},);
-      // // print(response1.statusCode);
-      // // print(response1.body);
-      // // var adressa = jsonDecode(response1.body);
-      // // print(adressa);
-    }
-    else { city = widget.userCity;}
+      // http.Response response1 = await http.get('https://atlas.mapmyindia.com/api/places/search/json?query=alwar',
+      //   headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},);
+      // print(response1.statusCode);
+      // print(response1.body);
+      // var adressa = jsonDecode(response1.body);
+      // print(adressa);
   }
   var geolocator = Geolocator();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -76,7 +82,7 @@ class _TsHomeScreenState extends State<TsHomeScreen> {
   @override
   void initState() {
     super.initState();
-    getCurrentLocation();
+    getUserLocation();
   }
   @override
   Widget build(BuildContext context) {
@@ -388,19 +394,28 @@ class _TsHomeScreenState extends State<TsHomeScreen> {
                       ),
                     ),
                     Scaffold(
-                      body: Center(
-                        child: ListView(
-                          children: [
-                            GestureDetector(
-                                onTap: ()async{
-                                  GpsDataModel gpsData = await getLocationByImei(imei: "355172100788965");
-                                  Navigator.push(context, MaterialPageRoute(builder: (context) =>ShowMapWithImei(gpsData: gpsData,)));
-                                  //sendUserDetails(userId: widget.user.uid, mobileNum: widget.user.phoneNumber, userType: "shipper");
-                                },
-                                child: TruckDetailsCard(imei : "355172100788965", mobileNum: widget.user.phoneNumber)),
-                            SizedBox(height: 10,),
-                            TruckDetailsCard(imei: "IMEI num", mobileNum: widget.user.phoneNumber,)
-                          ],
+                      body: ModalProgressHUD(
+                        inAsyncCall: showModalProgressHUD,
+                        child: Center(
+                          child: ListView(
+                            children: [
+                              GestureDetector(
+                                  onTap: ()async{
+                                    setState(() {
+                                      showModalProgressHUD = true;
+                                    });
+                                    GpsDataModel gpsData = await getLocationByImei(imei: "355172100788965");
+                                    Provider.of<NewDataByShipper>(context,listen: false).updateGpsData(gpsData);
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) =>ShowMapWithImei(gpsData: gpsData, userLocation: userLocation,)));
+                                    setState(() {
+                                      showModalProgressHUD = false;
+                                    });
+                                  },
+                                  child: TruckDetailsCard(imei : "355172100788965", mobileNum: widget.user.phoneNumber)),
+                              SizedBox(height: 10,),
+                              TruckDetailsCard(imei: "IMEI num", mobileNum: widget.user.phoneNumber,)
+                            ],
+                          ),
                         ),
                       )
                     ),
@@ -412,8 +427,14 @@ class _TsHomeScreenState extends State<TsHomeScreen> {
         ),
       ),
     );
+
+
   }
-}
+
+
+  }
+
+
 
 Future<GpsDataModel> getLocationByImei({String imei}) async {
   var jsonData;
@@ -429,27 +450,4 @@ Future<GpsDataModel> getLocationByImei({String imei}) async {
   gpsDataModel.deviceName = jsonData["deviceName"];
   gpsDataModel.powerValue = jsonData["powerValue"];
   return gpsDataModel;
-}
-
-void getCardsData() async {
-  var jsonData;
-  http.Response response = await http.get("http://localhost:8080/locationbyimei/355172100788965");
-  print(response.statusCode);
-
-  jsonData = await jsonDecode(response.body);
-
-  print(jsonData);
-  // List<CardsModal> card = [];
-  // for (var json in jsonData) {
-  //   CardsModal cardsModal = new CardsModal();
-  //   cardsModal.loadingPoint = json["loadingPoint"];
-  //   cardsModal.unloadingPoint = json["unloadingPoint"];
-  //   cardsModal.productType = json["productType"];
-  //   cardsModal.truckType = json["truckType"];
-  //   cardsModal.noOfTrucks = json["noOfTrucks"];
-  //   cardsModal.weight = json["weight"];
-  //   cardsModal.comment = json["comment"];
-  //   cardsModal.status = json["status"];
-  //   card.add(cardsModal);
-  // }
 }

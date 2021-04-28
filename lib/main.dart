@@ -12,17 +12,17 @@ import 'package:Liveasy/screens/transporter_login_screen.dart';
 import 'package:Liveasy/screens/shipper_home_Screen.dart';
 import 'package:Liveasy/screens/transporter_home_screen.dart';
 import 'package:http/http.dart' as http;
-void main() => runApp(FlashChat());
+
+void main(){runApp(FlashChat());}
 
 Future<String> getUserDetails(String mobileNum)async{
-
   http.Response response = await http.get("http://15.206.217.236:2000/users/$mobileNum");
   return response.body;
 }
+
 class FlashChat extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-
     return ChangeNotifierProvider<NewDataByShipper>(
       create: (context) => NewDataByShipper(),
       child: FutureBuilder(

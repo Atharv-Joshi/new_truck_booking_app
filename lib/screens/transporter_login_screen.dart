@@ -2,15 +2,44 @@ import 'package:Liveasy/screens/choice_screen.dart';
 import 'package:Liveasy/screens/shipper_login_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoder/geocoder.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:flutter/services.dart';
 import 'package:Liveasy/screens/transporter_home_screen.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:location_permissions/location_permissions.dart';
+import 'package:flutter/cupertino.dart';
 class TransporterLoginScreen extends StatefulWidget {
+  Position userPosition;
+  TransporterLoginScreen({this.userPosition});
   @override
   _TransporterLoginScreenState createState() => _TransporterLoginScreenState();
 }
 
 class _TransporterLoginScreenState extends State<TransporterLoginScreen> {
+  Position userPosition;
+  String userAddress;
+  void getUserLocation()async{
+    if(widget.userPosition == null){
+      PermissionStatus permission = await LocationPermissions().checkPermissionStatus();
+      if (permission == PermissionStatus.granted){
+        userPosition = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+        print(userPosition);
+      }
+    }
+    else{
+      userPosition = widget.userPosition;
+    }
+    final coordinates = new Coordinates(userPosition.latitude, userPosition.longitude);
+    var addresses = await Geocoder.local.findAddressesFromCoordinates(coordinates);
+    var first = addresses.first;
+    userAddress = first.addressLine;
+  }
+  @override
+  void initState() {
+    super.initState();
+    getUserLocation();
+  }
   String mobileNum;
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   User user;
@@ -34,7 +63,7 @@ class _TransporterLoginScreenState extends State<TransporterLoginScreen> {
             showProgressHud = false;
           });
           Navigator.pop(context);
-          sendUserDetails(userId: user.uid, mobileNum: user.phoneNumber, userType: "transporter");
+          sendUserDetails(userId: user.uid, mobileNum: user.phoneNumber, userType: "transporter", userAddress: userAddress);
           Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(
@@ -105,6 +134,7 @@ class _TransporterLoginScreenState extends State<TransporterLoginScreen> {
                       setState(() {
                         showProgressHud = false;
                       });
+                      sendUserDetails(userId: user.uid, mobileNum: user.phoneNumber, userType: "transporter", userAddress: userAddress);
                       Navigator.push(
                           context,
                           MaterialPageRoute(
