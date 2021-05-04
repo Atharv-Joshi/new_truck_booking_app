@@ -1,14 +1,14 @@
-import 'package:Liveasy/screens/choice_screen.dart';
-import 'package:Liveasy/screens/transporter_showMapUsingImei.dart';
-import 'package:Liveasy/widgets/providerData.dart';
+import 'package:Liveasy/screens/shipperOrTransporterChoiceScreen.dart';
+import 'package:Liveasy/screens/transporterScreens/transporterShowMapUsingImeiScreen.dart';
 import 'package:Liveasy/widgets/truckDetailsCardGenerator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:Liveasy/models/providerData.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:Liveasy/screens/transporter_find_load.dart';
-import 'package:Liveasy/screens/transporter_found_loads.dart';
+import 'package:Liveasy/screens/transporterScreens/transporterFindLoadScreen.dart';
+import 'package:Liveasy/screens/transporterScreens/transporterFoundLoadsScreen.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:Liveasy/widgets/backend_connection.dart';
+import 'package:Liveasy/models/gpsDataModel.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:location_permissions/location_permissions.dart';
@@ -21,7 +21,7 @@ String loadingPoint = '';
 String unloadingPoint = '';
 String apikey = 'AIzaSyCI8bvNwE05B7Cp03Rvc-QsMX9QjY-EsS4';
 class TsHomeScreen extends StatefulWidget {
-  User user;
+  final User user;
 
   TsHomeScreen({this.user});
   @override
@@ -405,7 +405,7 @@ class _TsHomeScreenState extends State<TsHomeScreen> {
                                       showModalProgressHUD = true;
                                     });
                                     GpsDataModel gpsData = await getLocationByImei(imei: "355172100788965");
-                                    Provider.of<NewDataByShipper>(context,listen: false).updateGpsData(gpsData);
+                                    Provider.of<ProviderData>(context,listen: false).updateGpsData(gpsData);
                                     Navigator.push(context, MaterialPageRoute(builder: (context) =>ShowMapWithImei(gpsData: gpsData, userLocation: userLocation,)));
                                     setState(() {
                                       showModalProgressHUD = false;

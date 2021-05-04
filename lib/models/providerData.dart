@@ -1,8 +1,7 @@
+import 'package:Liveasy/models/gpsDataModel.dart';
 import 'package:flutter/cupertino.dart';
 
-import 'backend_connection.dart';
-
-class NewDataByShipper extends ChangeNotifier {
+class ProviderData extends ChangeNotifier {
   String loadingPoint;
   String unloadingPoint;
   String productType;

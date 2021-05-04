@@ -1,47 +1,90 @@
-import 'package:Liveasy/screens/choice_screen.dart';
-import 'package:Liveasy/screens/shipper_login_screen.dart';
+import 'package:Liveasy/screens/shipperOrTransporterChoiceScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoder/geocoder.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
-import 'package:flutter/services.dart';
-import 'package:Liveasy/screens/transporter_home_screen.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:location_permissions/location_permissions.dart';
+import 'package:Liveasy/screens/shipperScreens/shipperHomeScreen.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
-class TransporterLoginScreen extends StatefulWidget {
-  Position userPosition;
-  TransporterLoginScreen({this.userPosition});
-  @override
-  _TransporterLoginScreenState createState() => _TransporterLoginScreenState();
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+Future<String> sendUserDetails(
+    {String userId,
+    String mobileNum,
+    String userType,
+    String userAddress}) async {
+  Map data = {
+    "id": userId,
+    "mobileNum": mobileNum,
+    "type": userType,
+    "address": userAddress
+  };
+  String body = json.encode(data);
+  final String apiUrl = "http://15.206.217.236:2000/users";
+  final response = await http.post(apiUrl,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: body);
+  print(response.statusCode);
+  if (response.statusCode == 200) {
+    final String responseString = response.body;
+    return responseString;
+  } else {
+    return null;
+  }
 }
 
-class _TransporterLoginScreenState extends State<TransporterLoginScreen> {
+class ShipperLoginScreen extends StatefulWidget {
+  final Position userPosition;
+
+  ShipperLoginScreen({this.userPosition});
+
+  @override
+  _ShipperLoginScreenState createState() => _ShipperLoginScreenState();
+}
+
+class _ShipperLoginScreenState extends State<ShipperLoginScreen> {
   Position userPosition;
   String userAddress;
-  void getUserLocation()async{
-    if(widget.userPosition == null){
-      PermissionStatus permission = await LocationPermissions().checkPermissionStatus();
-      if (permission == PermissionStatus.granted){
-        userPosition = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+
+  void getUserLocation() async {
+    if (widget.userPosition == null) {
+      PermissionStatus permission =
+          await LocationPermissions().checkPermissionStatus();
+      if (permission == PermissionStatus.granted) {
+        userPosition = await Geolocator()
+            .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
         print(userPosition);
       }
-    }
-    else{
+    } else {
       userPosition = widget.userPosition;
     }
-    final coordinates = new Coordinates(userPosition.latitude, userPosition.longitude);
-    var addresses = await Geocoder.local.findAddressesFromCoordinates(coordinates);
+    final coordinates =
+        new Coordinates(userPosition.latitude, userPosition.longitude);
+    var addresses =
+        await Geocoder.local.findAddressesFromCoordinates(coordinates);
     var first = addresses.first;
     userAddress = first.addressLine;
   }
+
   @override
   void initState() {
     super.initState();
     getUserLocation();
   }
-  String mobileNum;
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
+  String mobileNum;
   User user;
   final _codeController = TextEditingController();
 
@@ -49,7 +92,7 @@ class _TransporterLoginScreenState extends State<TransporterLoginScreen> {
 
   bool _disableButton = true;
 
-  Future<bool> loginUser(String phone, BuildContext context) async {
+  void loginUser(String phone) async {
     _auth.verifyPhoneNumber(
       phoneNumber: phone,
       timeout: Duration(seconds: 60),
@@ -62,29 +105,38 @@ class _TransporterLoginScreenState extends State<TransporterLoginScreen> {
           setState(() {
             showProgressHud = false;
           });
+          sendUserDetails(
+              userId: user.uid,
+              mobileNum: user.phoneNumber,
+              userType: "shipper",
+              userAddress: userAddress);
           Navigator.pop(context);
-          sendUserDetails(userId: user.uid, mobileNum: user.phoneNumber, userType: "transporter", userAddress: userAddress);
           Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(
-                builder: (context) => TsHomeScreen(
+                builder: (context) => ShipperHomeScreen(
                   user: user,
-                ),), (route) => false);
+                ),
+              ),
+              (route) => false);
         } else {
           setState(() {
             showProgressHud = false;
           });
-          Navigator.push(context, MaterialPageRoute(builder: (context) => ChoiceScreen()));
+          Navigator.pop(context);
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => ChoiceScreen()));
         }
 
-        //This callback would gets called when verification is done auto maticlly
+        //This callback would gets called when verification is done automatically
       },
       verificationFailed: (FirebaseAuthException exception) {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => ChoiceScreen()));
         setState(() {
           showProgressHud = false;
         });
         print(exception);
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => ChoiceScreen()));
       },
       codeSent: (String verificationId, [int forceResendingToken]) {
         showDialog(
@@ -111,39 +163,56 @@ class _TransporterLoginScreenState extends State<TransporterLoginScreen> {
                     child: Text("Confirm"),
                     textColor: Colors.white,
                     color: Color(0xFF6264A7),
-                    onPressed: () async {setState(() {
-                      showProgressHud = true;
-                    });
-                    try {
-                      final code = _codeController.text.trim();
-                      AuthCredential credential =
-                      PhoneAuthProvider.credential(
-                          verificationId: verificationId, smsCode: code);
-                      print(credential);
-                      var result =
-                      await _auth.signInWithCredential(credential);
-
-                      user = result.user;
-                      print(user);
-                    } catch (e) {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => ChoiceScreen()));
-                      throw e;
-                    }
-
-                    if (user != null) {
+                    onPressed: () async {
                       setState(() {
-                        showProgressHud = false;
+                        showProgressHud = true;
                       });
-                      sendUserDetails(userId: user.uid, mobileNum: user.phoneNumber, userType: "transporter", userAddress: userAddress);
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => TsHomeScreen(
-                                user: user,
-                              )));
-                    } else {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => ChoiceScreen()));
-                    }
+                      try {
+                        final code = _codeController.text.trim();
+                        AuthCredential credential =
+                            PhoneAuthProvider.credential(
+                                verificationId: verificationId, smsCode: code);
+                        print(credential);
+                        var result =
+                            await _auth.signInWithCredential(credential);
+
+                        user = result.user;
+                        print(user);
+                      } catch (e) {
+                        Navigator.pop(context);
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ChoiceScreen()));
+                        throw e;
+                      }
+
+                      if (user != null) {
+                        setState(() {
+                          showProgressHud = false;
+                        });
+                        sendUserDetails(
+                            userId: user.uid,
+                            mobileNum: user.phoneNumber,
+                            userType: "shipper",
+                            userAddress: userAddress);
+                        Navigator.pop(context);
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ShipperHomeScreen(
+                                      user: user,
+                                    )));
+                      } else {
+                        setState(() {
+                          showProgressHud = false;
+                        });
+                        Navigator.pop(context);
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ChoiceScreen()));
+                      }
                     },
                   )
                 ],
@@ -164,7 +233,9 @@ class _TransporterLoginScreenState extends State<TransporterLoginScreen> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: GestureDetector(
-        onTap: (){FocusScope.of(context).unfocus();},
+        onTap: () {
+          FocusScope.of(context).unfocus();
+        },
         child: Scaffold(
           appBar: AppBar(
             backgroundColor: Colors.black54,
@@ -176,14 +247,14 @@ class _TransporterLoginScreenState extends State<TransporterLoginScreen> {
               child: Icon(Icons.arrow_back_ios, size: 25),
             ),
           ),
-          backgroundColor:  Color(0xFFF3F2F1),
+          backgroundColor: Color(0xFFF3F2F1),
           key: _scaffoldKey,
           body: ModalProgressHUD(
             inAsyncCall: showProgressHud,
             child: Form(
               key: formKey,
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 15,  vertical: 20),
+                padding: EdgeInsets.symmetric(horizontal: 15, vertical: 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -202,13 +273,20 @@ class _TransporterLoginScreenState extends State<TransporterLoginScreen> {
                             ),
                           ),
                         ),
-                        SizedBox(width: 3,),
-                        Container(
-                          child: Text('+91', style: TextStyle(
-                            fontSize: 20,
-                          ),),
+                        SizedBox(
+                          width: 3,
                         ),
-                        SizedBox(width: 4,),
+                        Container(
+                          child: Text(
+                            '+91',
+                            style: TextStyle(
+                              fontSize: 20,
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 4,
+                        ),
                         SizedBox(
                           width: 200,
                           child: TextFormField(
@@ -224,7 +302,8 @@ class _TransporterLoginScreenState extends State<TransporterLoginScreen> {
                             keyboardType: TextInputType.phone,
                             inputFormatters: <TextInputFormatter>[
                               LengthLimitingTextInputFormatter(10),
-                              FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                              FilteringTextInputFormatter.allow(
+                                  RegExp(r'[0-9]')),
                             ],
                             onChanged: (value) {
                               mobileNum = value;
@@ -246,7 +325,6 @@ class _TransporterLoginScreenState extends State<TransporterLoginScreen> {
                                 hintStyle: TextStyle(fontSize: 20)),
                           ),
                         ),
-
                       ],
                     ),
                     SizedBox(
@@ -254,27 +332,24 @@ class _TransporterLoginScreenState extends State<TransporterLoginScreen> {
                     ),
                     RaisedButton(
                       color: Color(0xFF6264A7),
-
                       onPressed: _disableButton
                           ? null
                           : () {
-                        if (!formKey.currentState.validate()) {
-                          return;
-                        } else {
-                          setState(() {
-                            showProgressHud = true;
-                          });
-                          loginUser('+91$mobileNum', (context));
-                        }
-                      },
+                              if (!formKey.currentState.validate()) {
+                                return;
+                              } else {
+                                setState(() {
+                                  showProgressHud = true;
+                                });
+                                loginUser('+91$mobileNum');
+                              }
+                            },
                       child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                         child: Text(
                           'Verify',
-                          style: TextStyle(
-                              fontSize: 25,
-                              color: Colors.white
-                          ),
+                          style: TextStyle(fontSize: 25, color: Colors.white),
                         ),
                       ),
                     ),
@@ -288,4 +363,3 @@ class _TransporterLoginScreenState extends State<TransporterLoginScreen> {
     );
   }
 }
-

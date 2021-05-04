@@ -7,15 +7,15 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
 import 'package:http/http.dart' as http;
-import 'package:Liveasy/widgets/backend_connection.dart';
+import 'package:Liveasy/models/gpsDataModel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
-import 'package:Liveasy/widgets/providerData.dart';
+import 'package:Liveasy/models/providerData.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-String mapKey = "AIzaSyCTVVijIWofDrI6LpSzhUqJIF90X-iyZmE";
-
+double speed = 0;
 Future<GpsDataModel> getGpsDataFromApi(int imei)async{
+  if(speed >2){
     sleep(Duration(seconds: 20));
     var jsonData;
     http.Response response;
@@ -32,12 +32,13 @@ Future<GpsDataModel> getGpsDataFromApi(int imei)async{
     gpsDataModel.speed = jsonData["speed"];
     gpsDataModel.deviceName = jsonData["deviceName"];
     gpsDataModel.powerValue = jsonData["powerValue"];
-    return gpsDataModel;
+    return gpsDataModel;}
+  else{return null;}
 }
 
 class ShowMapWithImei extends StatefulWidget {
-  GpsDataModel gpsData;
-  Position userLocation;
+  final GpsDataModel gpsData;
+  final Position userLocation;
   ShowMapWithImei({this.gpsData, this.userLocation});
   @override
   _ShowMapWithImeiState createState() => _ShowMapWithImeiState();
@@ -49,6 +50,7 @@ class _ShowMapWithImeiState extends State<ShowMapWithImei> {
     super.initState();
      getAddress();
      setCustomMapPin("assets/truckAsMarker.jpeg");
+     speed = double.parse(widget.gpsData.speed);
   }
   @override
   void dispose() {
@@ -59,10 +61,14 @@ class _ShowMapWithImeiState extends State<ShowMapWithImei> {
   bool shouldRun = true;
   void getGpsDataByImei({String imei}) async {
     while(shouldRun){
-    final GpsDataModel result = await compute( getGpsDataFromApi, int.parse(Provider.of<NewDataByShipper>(context, listen: false).gpsData.imei) );
-    Provider.of<NewDataByShipper>(context, listen: false).updateGpsData(result);
-    getAddress();
-    updateDeviceMarker(LatLng(Provider.of<NewDataByShipper>(context,listen: false).gpsData.lat, Provider.of<NewDataByShipper>(context,listen: false).gpsData.lng));
+      speed = double.parse(Provider.of<ProviderData>(context, listen: false).gpsData.speed);
+    final GpsDataModel result = await compute( getGpsDataFromApi, int.parse(widget.gpsData.imei) );
+    if (result != null) {
+      Provider.of<ProviderData>(context, listen: false).updateGpsData(
+          result);
+      getAddress();
+      updateDeviceMarker(LatLng(Provider.of<ProviderData>(context, listen: false).gpsData.lat, Provider.of<ProviderData>(context, listen: false).gpsData.lng));
+    }
     }
   }
   String address = "";
@@ -82,7 +88,9 @@ class _ShowMapWithImeiState extends State<ShowMapWithImei> {
       markers.add(
           Marker(
               markerId: MarkerId("DeviceMarker"),
+              rotation: 0,
               position: latLng,
+              anchor: Offset(0.5,0.5),
               icon: pinLocationIcon));
        _createPolylines(myLocation, Position(latitude: latLng.latitude, longitude: latLng.longitude));
     });
@@ -104,7 +112,7 @@ class _ShowMapWithImeiState extends State<ShowMapWithImei> {
   }
 
   void getAddress()async{
-    var addresses = await Geocoder.local.findAddressesFromCoordinates(Coordinates(Provider.of<NewDataByShipper>(context,listen: false).gpsData.lat, Provider.of<NewDataByShipper>(context,listen: false).gpsData.lng));
+    var addresses = await Geocoder.local.findAddressesFromCoordinates(Coordinates(Provider.of<ProviderData>(context,listen: false).gpsData.lat, Provider.of<ProviderData>(context,listen: false).gpsData.lng));
     var first = addresses.first;
     print(first.addressLine);
     if(mapMyIndiaToken == ""){
@@ -196,9 +204,9 @@ class _ShowMapWithImeiState extends State<ShowMapWithImei> {
     // print(body["results"][0]["locality"]);
     // print(body["results"][0]);
     LatLng latLng_1 = coordinates;
-    LatLng latLng_2 = LatLng(Provider.of<NewDataByShipper>(context,listen: false).gpsData.lat, Provider.of<NewDataByShipper>(context,listen: false).gpsData.lng);
+    LatLng latLng_2 = LatLng(Provider.of<ProviderData>(context,listen: false).gpsData.lat, Provider.of<ProviderData>(context,listen: false).gpsData.lng);
     if (latLng_1.latitude > latLng_2.latitude){
-      latLng_1 = LatLng(Provider.of<NewDataByShipper>(context,listen: false).gpsData.lat, Provider.of<NewDataByShipper>(context,listen: false).gpsData.lng);
+      latLng_1 = LatLng(Provider.of<ProviderData>(context,listen: false).gpsData.lat, Provider.of<ProviderData>(context,listen: false).gpsData.lng);
       latLng_2 = coordinates;
     }
 
@@ -226,8 +234,8 @@ class _ShowMapWithImeiState extends State<ShowMapWithImei> {
 
 
     showMarkerAtPosition(myLocation, "myPosition", BitmapDescriptor.defaultMarker);
-    updateDeviceMarker(LatLng(Provider.of<NewDataByShipper>(context,listen: false).gpsData.lat, Provider.of<NewDataByShipper>(context,listen: false).gpsData.lng));
-    getGpsDataByImei(imei: "355172100788965");
+    updateDeviceMarker(LatLng(Provider.of<ProviderData>(context,listen: false).gpsData.lat, Provider.of<ProviderData>(context,listen: false).gpsData.lng));
+    getGpsDataByImei(imei: widget.gpsData.imei);
   }
 
 
@@ -267,32 +275,62 @@ class _ShowMapWithImeiState extends State<ShowMapWithImei> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData.dark(),
       home: GestureDetector(
         onTap: (){FocusScope.of(context).unfocus();},
         child: Scaffold(
+          appBar: AppBar(
+            backgroundColor: Color(0xFF525252),
+            title: Row(mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: Icon(Icons.arrow_back_ios, size: 25),
+                ),
+                Container(
+                  padding: EdgeInsets.all(0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(0),
+                        width : (MediaQuery.of(context).size.width) / 1.5,
+                        child: Text(address, style: TextStyle(fontSize: 18),),
+                      ),
+                      Text(Provider.of<ProviderData>(context).gpsData.speed, style: TextStyle(fontSize: 40),),
+                      Text("km/hr", style: TextStyle(fontSize: 10),)
+                    ],
+                  ),
+
+                ),
+              ],
+            ),
+          ),
           body: SafeArea(
             child: Container(
               color: Color(0xFFF3F2F1),
               child: Column(mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        child: Row(
-                          children: [
-                            Container(
-                              width : 250,
-                              child: Text(address, style: TextStyle(fontSize: 18),),
-                            ),
-                            Text(Provider.of<NewDataByShipper>(context).gpsData.speed, style: TextStyle(fontSize: 50),),
-                            Text("km/hr", style: TextStyle(fontSize: 13),)
-                          ],
-                        ),
-
-                      ),
-                    ],
-                  ),
+                  // Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  //   crossAxisAlignment: CrossAxisAlignment.start,
+                  //   children: [
+                  //     Container(
+                  //       child: Row(
+                  //         children: [
+                  //           Container(
+                  //             width : 250,
+                  //             child: Text(address, style: TextStyle(fontSize: 18),),
+                  //           ),
+                  //           Text(Provider.of<NewDataByShipper>(context).gpsData.speed, style: TextStyle(fontSize: 50),),
+                  //           Text("km/hr", style: TextStyle(fontSize: 13),)
+                  //         ],
+                  //       ),
+                  //
+                  //     ),
+                  //   ],
+                  // ),
                   Expanded(
                     child: GoogleMap(
                        polylines: Set.from(polylines.values),
@@ -302,7 +340,7 @@ class _ShowMapWithImeiState extends State<ShowMapWithImei> {
                       onMapCreated: (GoogleMapController controller){
                         _controllerGoogleMap.complete(controller);
                         googleMapController = controller;
-                        googleMapController.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: LatLng(Provider.of<NewDataByShipper>(context,listen: false).gpsData.lat, Provider.of<NewDataByShipper>(context,listen: false).gpsData.lng),zoom: 14.5)),);
+                        googleMapController.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: LatLng(Provider.of<ProviderData>(context,listen: false).gpsData.lat, Provider.of<ProviderData>(context,listen: false).gpsData.lng),zoom: 14.5)),);
                         getCurrentLocation();
                       },
                     ),

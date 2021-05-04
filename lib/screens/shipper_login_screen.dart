@@ -1,6 +1,9 @@
 import 'package:Liveasy/screens/choice_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoder/geocoder.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:location_permissions/location_permissions.dart';
 import 'shipper_home_Screen.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:flutter/services.dart';
@@ -8,18 +11,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-class ShipperLoginScreen extends StatefulWidget {
-  @override
-  _ShipperLoginScreenState createState() => _ShipperLoginScreenState();
-}
-
-Future<String> sendUserDetails({String userId, String mobileNum,String userType}) async {
+Future<String> sendUserDetails({String userId, String mobileNum,String userType, String userAddress}) async {
 
   Map data = {
-    "userID": userId,
+
+    "id": userId,
     "mobileNum": mobileNum,
-    "userType": userType
-    };
+    "type": userType,
+    "address": userAddress
+  };
   String body = json.encode(data);
   final String apiUrl = "http://15.206.217.236:2000/users";
   final response = await http.post(apiUrl,
@@ -36,8 +36,42 @@ Future<String> sendUserDetails({String userId, String mobileNum,String userType}
   }
 }
 
+class ShipperLoginScreen extends StatefulWidget {
+  Position userPosition;
+  ShipperLoginScreen({this.userPosition});
+  @override
+  _ShipperLoginScreenState createState() => _ShipperLoginScreenState();
+}
+
 
 class _ShipperLoginScreenState extends State<ShipperLoginScreen> {
+  Position userPosition;
+  String userAddress;
+  void getUserLocation()async{
+    if(widget.userPosition == null){
+      PermissionStatus permission = await LocationPermissions().checkPermissionStatus();
+      if (permission == PermissionStatus.granted){
+        userPosition = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+        print(userPosition);
+      }
+    }
+    else{
+      userPosition = widget.userPosition;
+    }
+    final coordinates = new Coordinates(userPosition.latitude, userPosition.longitude);
+    var addresses = await Geocoder.local.findAddressesFromCoordinates(coordinates);
+    var first = addresses.first;
+    userAddress = first.addressLine;
+  }
+  @override
+  void initState() {
+    super.initState();
+    getUserLocation();
+  }
+  @override
+  void dispose() {
+    super.dispose();
+  }
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   String mobileNum;
@@ -47,8 +81,7 @@ class _ShipperLoginScreenState extends State<ShipperLoginScreen> {
   FirebaseAuth _auth = FirebaseAuth.instance;
 
   bool _disableButton = true;
-
-  Future<bool> loginUser(String phone, BuildContext context) async {
+  Future<bool> loginUser(String phone) async {
     _auth.verifyPhoneNumber(
       phoneNumber: phone,
       timeout: Duration(seconds: 60),
@@ -61,29 +94,32 @@ class _ShipperLoginScreenState extends State<ShipperLoginScreen> {
           setState(() {
             showProgressHud = false;
           });
+          sendUserDetails(userId: user.uid, mobileNum: user.phoneNumber, userType: "shipper", userAddress: userAddress);
           Navigator.pop(context);
-          sendUserDetails(userId: user.uid, mobileNum: user.phoneNumber, userType: "shipper");
           Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(
-                  builder: (context) => ShipperHomeScreen(
-                        user: user,
-                      ),), (route) => false);
+                builder: (context) => ShipperHomeScreen(
+                  user: user,
+                ),), (route) => false);
         } else {
           setState(() {
             showProgressHud = false;
           });
+          Navigator.pop(context);
           Navigator.push(context, MaterialPageRoute(builder: (context) => ChoiceScreen()));
         }
 
         //This callback would gets called when verification is done automatically
       },
       verificationFailed: (FirebaseAuthException exception) {
-        Navigator.pushNamed(context, '/');
         setState(() {
           showProgressHud = false;
         });
         print(exception);
+        Navigator.push(context, MaterialPageRoute(builder: (context) => ChoiceScreen()));
+
+
       },
       codeSent: (String verificationId, [int forceResendingToken]) {
         showDialog(
@@ -113,36 +149,42 @@ class _ShipperLoginScreenState extends State<ShipperLoginScreen> {
                     onPressed: () async {setState(() {
                       showProgressHud = true;
                     });
-                      try {
-                        final code = _codeController.text.trim();
-                        AuthCredential credential =
-                            PhoneAuthProvider.credential(
-                                verificationId: verificationId, smsCode: code);
-                        print(credential);
-                        var result =
-                            await _auth.signInWithCredential(credential);
+                    try {
+                      final code = _codeController.text.trim();
+                      AuthCredential credential =
+                      PhoneAuthProvider.credential(
+                          verificationId: verificationId, smsCode: code);
+                      print(credential);
+                      var result =
+                      await _auth.signInWithCredential(credential);
 
-                        user = result.user;
-                        print(user);
-                      } catch (e) {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => ChoiceScreen()));
-                        throw e;
-                      }
+                      user = result.user;
+                      print(user);
+                    } catch (e) {
+                      Navigator.pop(context);
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => ChoiceScreen()));
+                      throw e;
+                    }
 
-                      if (user != null) {
-                        setState(() {
-                          showProgressHud = false;
-                        });
-                        sendUserDetails(userId: user.uid, mobileNum: user.phoneNumber, userType: "shipper");
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => ShipperHomeScreen(
-                                      user: user,
-                                    )));
-                      } else {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => ChoiceScreen()));
-                      }
+                    if (user != null) {
+                      setState(() {
+                        showProgressHud = false;
+                      });
+                      sendUserDetails(userId: user.uid, mobileNum: user.phoneNumber, userType: "shipper", userAddress: userAddress);
+                      Navigator.pop(context);
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ShipperHomeScreen(
+                                user: user,
+                              )));
+                    } else {
+                      setState(() {
+                        showProgressHud = false;
+                      });
+                      Navigator.pop(context);
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => ChoiceScreen()));
+                    }
                     },
                   )
                 ],
@@ -154,6 +196,7 @@ class _ShipperLoginScreenState extends State<ShipperLoginScreen> {
       },
     );
   }
+
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool showProgressHud = false;
@@ -257,22 +300,22 @@ class _ShipperLoginScreenState extends State<ShipperLoginScreen> {
                       onPressed: _disableButton
                           ? null
                           : () {
-                              if (!formKey.currentState.validate()) {
-                                return;
-                              } else {
-                                setState(() {
-                                  showProgressHud = true;
-                                });
-                                loginUser('+91$mobileNum', (context));
-                              }
-                            },
+                        if (!formKey.currentState.validate()) {
+                          return;
+                        } else {
+                          setState(() {
+                            showProgressHud = true;
+                          });
+                          loginUser('+91$mobileNum');
+                        }
+                      },
                       child: Container(
                         padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                         child: Text(
                           'Verify',
                           style: TextStyle(
-                            fontSize: 25,
-                            color: Colors.white
+                              fontSize: 25,
+                              color: Colors.white
                           ),
                         ),
                       ),

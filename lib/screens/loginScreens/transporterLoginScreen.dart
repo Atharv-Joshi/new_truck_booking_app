@@ -1,16 +1,16 @@
-import 'package:Liveasy/screens/choice_screen.dart';
-import 'package:Liveasy/screens/shipper_login_screen.dart';
+import 'package:Liveasy/screens/shipperOrTransporterChoiceScreen.dart';
+import 'package:Liveasy/screens/loginScreens/shipperLoginScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:flutter/services.dart';
-import 'package:Liveasy/screens/transporter_home_screen.dart';
+import 'package:Liveasy/screens/transporterScreens/transporterHomeScreen.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:location_permissions/location_permissions.dart';
 import 'package:flutter/cupertino.dart';
 class TransporterLoginScreen extends StatefulWidget {
-  Position userPosition;
+  final Position userPosition;
   TransporterLoginScreen({this.userPosition});
   @override
   _TransporterLoginScreenState createState() => _TransporterLoginScreenState();
@@ -49,7 +49,7 @@ class _TransporterLoginScreenState extends State<TransporterLoginScreen> {
 
   bool _disableButton = true;
 
-  Future<bool> loginUser(String phone, BuildContext context) async {
+  void loginUser(String phone, BuildContext context) async {
     _auth.verifyPhoneNumber(
       phoneNumber: phone,
       timeout: Duration(seconds: 60),

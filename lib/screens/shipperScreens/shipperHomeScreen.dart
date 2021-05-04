@@ -1,4 +1,4 @@
-import 'package:Liveasy/screens/choice_screen.dart';
+import 'package:Liveasy/screens/shipperOrTransporterChoiceScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -8,18 +8,19 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:Liveasy/widgets/backend_connection.dart';
-import 'package:Liveasy/widgets/cardProperties.dart';
+import 'package:Liveasy/models/loadDataModel.dart';
+import 'package:Liveasy/widgets/loadDataCardWidget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
-import 'package:Liveasy/widgets/weight_modal_screen.dart';
-import 'package:Liveasy/widgets/noOfTrucks_modal_screen.dart';
-import 'package:Liveasy/widgets/providerData.dart';
+import 'package:Liveasy/widgets/weightPopUpModel.dart';
+import 'package:Liveasy/widgets/noOfTrucksPopUpModel.dart';
+import 'package:Liveasy/models/providerData.dart';
 import 'package:Liveasy/widgets/dropDownGenerator.dart';
-import 'package:Liveasy/widgets/product_type_modal_screen.dart';
-import 'package:Liveasy/widgets/truck_type_modal_screen.dart';
-import 'package:Liveasy/widgets/functionsAndModels.dart';
-String mapKey = "AIzaSyCTVVijIWofDrI6LpSzhUqJIF90X-iyZmE";
+import 'package:Liveasy/widgets/productTypePopUpModel.dart';
+import 'package:Liveasy/widgets/truckTypePopUpModel.dart';
+import 'package:Liveasy/widgets/cityAutoComplete.dart';
+import 'package:Liveasy/widgets/datePicker.dart';
+
 
 var controller1 = TextEditingController();
 var controller2 = TextEditingController();
@@ -45,15 +46,15 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
 
-  Future<CardsModal> submitOnLoadApiAndClear() async {
+  Future<LoadDataModel> submitOnLoadApiAndClear() async {
     Map data = {
-      "loadingPoint": Provider.of<NewDataByShipper>(context, listen: false).loadingPoint,
-      "unloadingPoint": Provider.of<NewDataByShipper>(context, listen: false).unloadingPoint,
-      "productType": Provider.of<NewDataByShipper>(context, listen: false).productType,
-      "truckType": Provider.of<NewDataByShipper>(context, listen: false).truckPreference,
-      "noOfTrucks": Provider.of<NewDataByShipper>(context, listen: false).noOfTrucks,
-      "weight": Provider.of<NewDataByShipper>(context, listen: false).weight,
-      "comment": Provider.of<NewDataByShipper>(context, listen: false).isCommentsEmpty ? '' : Provider.of<NewDataByShipper>(context, listen: false).comments
+      "loadingPoint": Provider.of<ProviderData>(context, listen: false).loadingPoint,
+      "unloadingPoint": Provider.of<ProviderData>(context, listen: false).unloadingPoint,
+      "productType": Provider.of<ProviderData>(context, listen: false).productType,
+      "truckType": Provider.of<ProviderData>(context, listen: false).truckPreference,
+      "noOfTrucks": Provider.of<ProviderData>(context, listen: false).noOfTrucks,
+      "weight": Provider.of<ProviderData>(context, listen: false).weight,
+      "comment": Provider.of<ProviderData>(context, listen: false).isCommentsEmpty ? '' : Provider.of<ProviderData>(context, listen: false).comments
     };
     String body = json.encode(data);
     final String apiUrl = "http://ec2-52-53-40-46.us-west-1.compute.amazonaws.com:8080/load";
@@ -62,14 +63,14 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: body);
-    Provider.of<NewDataByShipper>(context,listen: false).clearAll();
-    ProductTypeWidgetScreen().clear_all();
-    TruckTypeWidgetScreen().clear_all();
-    WeightWidgetScreen().clear_all();
+    Provider.of<ProviderData>(context,listen: false).clearAll();
+    ProductTypeWidgetScreen().clearAll();
+    TruckTypeWidgetScreen().clearAll();
+    WeightWidgetScreen().clearAll();
     controller2.clear();
     controller3.clear();
     controller1 = TextEditingController(text: city);
-    Provider.of<NewDataByShipper>(context,listen: false).updateLoadingPoint(newValue: city);
+    Provider.of<ProviderData>(context,listen: false).updateLoadingPoint(newValue: city);
     print(response.statusCode);
     if (response.statusCode == 200) {
       final String responseString = response.body;
@@ -89,14 +90,14 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
     }
   }
 
-  Future<List<CardsModal>> getDataFromLoadApi() async {
+  Future<List<LoadDataModel>> getDataFromLoadApi() async {
     var jsonData;
     http.Response response = await http.get("http://ec2-52-53-40-46.us-west-1.compute.amazonaws.com:8080/load");
     jsonData = await jsonDecode(response.body);
     print(jsonData);
-    List<CardsModal> card = [];
+    List<LoadDataModel> card = [];
     for (var json in jsonData) {
-      CardsModal cardsModal = new CardsModal();
+      LoadDataModel cardsModal = new LoadDataModel();
       cardsModal.loadingPoint = json["loadingPoint"];
       cardsModal.unloadingPoint = json["unloadingPoint"];
       cardsModal.productType = json["productType"];
@@ -143,7 +144,7 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
     city = '$cityName ($stateName)';
     print(city);
     controller1 = TextEditingController(text: city);
-    Provider.of<NewDataByShipper>(context,listen: false).updateLoadingPoint(newValue: city);
+    Provider.of<ProviderData>(context,listen: false).updateLoadingPoint(newValue: city);
   }
 
 
@@ -154,10 +155,10 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
   }
   @override
   Widget build(BuildContext context) {
-    if (Provider.of<NewDataByShipper>(context).loadingPoint != null){
-      controller1 = TextEditingController(text:(Provider.of<NewDataByShipper>(context).loadingPoint));}
-    if (Provider.of<NewDataByShipper>(context).unloadingPoint != null){
-      controller2 = TextEditingController(text:(Provider.of<NewDataByShipper>(context).unloadingPoint));}
+    if (Provider.of<ProviderData>(context).loadingPoint != null){
+      controller1 = TextEditingController(text:(Provider.of<ProviderData>(context).loadingPoint));}
+    if (Provider.of<ProviderData>(context).unloadingPoint != null){
+      controller2 = TextEditingController(text:(Provider.of<ProviderData>(context).unloadingPoint));}
     return MaterialApp(
       theme: ThemeData.light(),
       home: SafeArea(
@@ -372,7 +373,7 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
                                                     });
                                                   }
                                                 },
-                                                onFieldSubmitted: (String value){ Provider.of<NewDataByShipper>(context, listen: false).updateLoadingPoint(newValue:value.trim());} ,
+                                                onFieldSubmitted: (String value){ Provider.of<ProviderData>(context, listen: false).updateLoadingPoint(newValue:value.trim());} ,
                                                 decoration: InputDecoration(
                                                   hintText: 'Loading Point',
                                                   hintStyle:
@@ -390,7 +391,7 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
                                             ),
                                             Container(
                                               child: GestureDetector(onTap:(){setState(() {
-                                                Provider.of<NewDataByShipper>(context,listen: false).updateLoadingPoint(newValue: null);
+                                                Provider.of<ProviderData>(context,listen: false).updateLoadingPoint(newValue: null);
                                                 locationCard1 = null;
                                                 controller1 = TextEditingController(text: null);
                                               });} ,child: Icon(Icons.clear,size: 25, color: Colors.black26,)),
@@ -422,7 +423,7 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
                                                   itemBuilder: (context, index) => buildCard(
                                                       placeName: snapshot.data[index].placeName,
                                                       placeAddress: snapshot.data[index].placeAddress,
-                                                      CardType: 'loading',
+                                                      cardType: 'loading',
                                                       context: context)
                                               );}),) : Container(),
                                       SizedBox(
@@ -448,7 +449,7 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
                                                     });
                                                   }
                                                 },
-                                                onFieldSubmitted: (String value){ Provider.of<NewDataByShipper>(context, listen: false).updateUnloadingPoint(newValue:value.trim());} ,
+                                                onFieldSubmitted: (String value){ Provider.of<ProviderData>(context, listen: false).updateUnloadingPoint(newValue:value.trim());} ,
                                                 decoration: InputDecoration(
                                                   hintText: 'Unloading Point',
                                                   hintStyle:
@@ -466,7 +467,7 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
                                             ),
                                             Container(
                                               child: GestureDetector(onTap:(){setState(() {
-                                                Provider.of<NewDataByShipper>(context,listen: false).updateUnloadingPoint(newValue: null);
+                                                Provider.of<ProviderData>(context,listen: false).updateUnloadingPoint(newValue: null);
                                                 locationCard2 = null;
                                                 controller2= TextEditingController(text: null);
                                               });} ,child: Icon(Icons.clear, size: 25, color: Colors.black26,)),
@@ -498,7 +499,7 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
                                                   itemBuilder: (context, index) => buildCard(
                                                     placeName: snapshot.data[index].placeName,
                                                     placeAddress: snapshot.data[index].placeAddress,
-                                                    CardType: 'unloading',
+                                                    cardType: 'unloading',
                                                     context: context,)
                                               );}),) : Container(),
                                       SizedBox(
@@ -514,9 +515,9 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
                                           child: DropDownGenerator(
                                             dropdownValue: 'Product Type',
                                             dropdownValues: [],
-                                            hintText: Provider.of<NewDataByShipper>(context).productType== null
+                                            hintText: Provider.of<ProviderData>(context).productType== null
                                                 ? 'Product Type'
-                                                :  Provider.of<NewDataByShipper>(context).productType,
+                                                :  Provider.of<ProviderData>(context).productType,
                                             notAllowedValue: 'Product Type',
                                           ),
                                         ),
@@ -534,9 +535,9 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
                                           child: DropDownGenerator(
                                             dropdownValue: 'Truck Preference',
                                             dropdownValues: [],
-                                            hintText: Provider.of<NewDataByShipper>(context).truckPreference== null
+                                            hintText: Provider.of<ProviderData>(context).truckPreference== null
                                                 ? 'Truck Preference'
-                                                :  Provider.of<NewDataByShipper>(context).truckPreference,
+                                                :  Provider.of<ProviderData>(context).truckPreference,
                                             notAllowedValue: 'Truck Preference',
                                           ),
                                         ),
@@ -564,9 +565,9 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
                                                   child: DropDownGenerator(
                                                     dropdownValue: 'No Of Trucks',
                                                     dropdownValues: [],
-                                                    hintText: Provider.of<NewDataByShipper>(context).noOfTrucks== '1'
+                                                    hintText: Provider.of<ProviderData>(context).noOfTrucks== '1'
                                                         ? '1'
-                                                        :  Provider.of<NewDataByShipper>(context).noOfTrucks,
+                                                        :  Provider.of<ProviderData>(context).noOfTrucks,
                                                     notAllowedValue:'No Of Trucks' ,
                                                   ),
                                                 ),
@@ -591,9 +592,9 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
                                               child: DropDownGenerator(
                                                 dropdownValue: 'Weight(In Tons)',
                                                 dropdownValues: [],
-                                                hintText: Provider.of<NewDataByShipper>(context).weight== null
+                                                hintText: Provider.of<ProviderData>(context).weight== null
                                                     ? 'Weight (In Tons)'
-                                                    :  Provider.of<NewDataByShipper>(context).weight,
+                                                    :  Provider.of<ProviderData>(context).weight,
                                                 notAllowedValue: 'Weight (In Tons)',
                                               ),
                                             ),
@@ -619,7 +620,7 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
                                         child: TextField(
                                           controller: controller3,
                                           onChanged: (newValue) {
-                                            Provider.of<NewDataByShipper>(context, listen: false).updateComments(newValue: newValue);
+                                            Provider.of<ProviderData>(context, listen: false).updateComments(newValue: newValue);
                                           },
                                           decoration: InputDecoration(
                                             hintText: 'Comments',
@@ -642,42 +643,42 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
                                   if (!formKey.currentState.validate()) {
                                     return;
                                   }
-                                  if (Provider.of<NewDataByShipper>(context,listen: false).loadingPoint == null){
+                                  if (Provider.of<ProviderData>(context,listen: false).loadingPoint == null){
                                     print('loading Point Null');
                                     throw 'Loading Point Null';
                                   }
-                                  if (Provider.of<NewDataByShipper>(context,listen: false).unloadingPoint == null){
+                                  if (Provider.of<ProviderData>(context,listen: false).unloadingPoint == null){
                                     print('Unloading Point Null');
                                     throw 'Unloading Point Null';
                                   }
-                                  if (Provider.of<NewDataByShipper>(context, listen: false).productType == null){
+                                  if (Provider.of<ProviderData>(context, listen: false).productType == null){
                                     showDialog(context: context, builder: (context) => ProductTypeWidgetScreen());
                                   }
-                                  else if (Provider.of<NewDataByShipper>(context, listen: false).truckPreference == null){
+                                  else if (Provider.of<ProviderData>(context, listen: false).truckPreference == null){
                                     showDialog(context: context, builder: (context) => TruckTypeWidgetScreen());
                                   }
                                   // else if (Provider.of<NewDataByShipper>(context, listen: false).noOfTrucks == null){
                                   //   showDialog(context: context, builder: (context) => NoOfTrucksWidgetScreen());
                                   // }
-                                  else if (Provider.of<NewDataByShipper>(context, listen: false).weight == null){
+                                  else if (Provider.of<ProviderData>(context, listen: false).weight == null){
                                     showDialog(context: context, builder: (context) => WeightWidgetScreen());
                                   }
                                   else{
-                                    if (Provider.of<NewDataByShipper>(context, listen: false).comments != null) {
-                                      if (Provider.of<NewDataByShipper>(context, listen: false).comments.isNotEmpty) {
-                                        if (Provider.of<NewDataByShipper>(context, listen: false).comments != '') {
-                                          Provider.of<NewDataByShipper>(context, listen: false).updateIsCommentsEmpty(newValue: false);
+                                    if (Provider.of<ProviderData>(context, listen: false).comments != null) {
+                                      if (Provider.of<ProviderData>(context, listen: false).comments.isNotEmpty) {
+                                        if (Provider.of<ProviderData>(context, listen: false).comments != '') {
+                                          Provider.of<ProviderData>(context, listen: false).updateIsCommentsEmpty(newValue: false);
                                         } else {
-                                          Provider.of<NewDataByShipper>(context, listen: false).updateIsCommentsEmpty(newValue: true);
+                                          Provider.of<ProviderData>(context, listen: false).updateIsCommentsEmpty(newValue: true);
                                         }
                                       } else {
-                                        Provider.of<NewDataByShipper>(context, listen: false).updateIsCommentsEmpty(newValue: true);
+                                        Provider.of<ProviderData>(context, listen: false).updateIsCommentsEmpty(newValue: true);
                                       }
                                     } else {
-                                      Provider.of<NewDataByShipper>(context, listen: false).updateIsCommentsEmpty(newValue: true);
+                                      Provider.of<ProviderData>(context, listen: false).updateIsCommentsEmpty(newValue: true);
                                     }
                                     try {
-                                      final createdCard = await submitOnLoadApiAndClear();
+                                      await submitOnLoadApiAndClear();
                                       setState(() {
                                         _controller.jumpToPage(2);
                                       });
@@ -752,16 +753,16 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
       ),
     );
   }
-  GestureDetector buildCard({BuildContext context, String placeName, String placeAddress, String CardType}) {
+  GestureDetector buildCard({BuildContext context, String placeName, String placeAddress, String cardType}) {
     return GestureDetector(
       onTap: (){
         setState(() {
-          if (CardType == 'loading'){
+          if (cardType == 'loading'){
             locationCard1 = null;
-            Provider.of<NewDataByShipper>(context,listen: false).updateLoadingPoint(newValue: '$placeName ($placeAddress)');}
-          else if (CardType =='unloading'){
+            Provider.of<ProviderData>(context,listen: false).updateLoadingPoint(newValue: '$placeName ($placeAddress)');}
+          else if (cardType =='unloading'){
             locationCard2 = null;
-            Provider.of<NewDataByShipper>(context,listen: false).updateUnloadingPoint(newValue: '$placeName ($placeAddress)');}
+            Provider.of<ProviderData>(context,listen: false).updateUnloadingPoint(newValue: '$placeName ($placeAddress)');}
         });
       },
       child: Container(
