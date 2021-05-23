@@ -19,7 +19,7 @@ class LoadingPointSearchScreen extends StatefulWidget {
 }
 
 class _LoadingPointSearchScreenState extends State<LoadingPointSearchScreen> {
-  var LoacationCards;
+  var locationCards;
   Future<List<LoactionCardsModal>> fillCityName(String cityName) async {
     if (cityName.length > 1) {
       print('abc');
@@ -68,7 +68,7 @@ class _LoadingPointSearchScreenState extends State<LoadingPointSearchScreen> {
                 onChanged: (newValue) {
                   print(newValue);
                   setState(() {
-                    LoacationCards = fillCityName(newValue);
+                    locationCards = fillCityName(newValue);
                   });
                   //Provider.of<NewDataByShipper>(context, listen: false).updateLoadingPoint(newValue: newValue.trim());
 
@@ -94,7 +94,7 @@ class _LoadingPointSearchScreenState extends State<LoadingPointSearchScreen> {
               height: 10,
             ),
             Container(child: FutureBuilder(
-              future: LoacationCards,
+              future: locationCards,
                 builder: (BuildContext context,  AsyncSnapshot snapshot ){
                   if (snapshot.data == null) {
                     return Container(

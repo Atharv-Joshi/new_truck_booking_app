@@ -88,9 +88,9 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
         },
         body: body);
     Provider.of<NewDataByShipper>(context,listen: false).clearAll();
-    ProductTypeWidgetScreen().clear_all();
-    TruckTypeWidgetScreen().clear_all();
-    WeightWidgetScreen().clear_all();
+    ProductTypeWidgetScreen().clearAll();
+    TruckTypeWidgetScreen().clearAll();
+    WeightWidgetScreen().clearAll();
     print(response.statusCode);
     if (response.statusCode == 200) {
       final String responseString = response.body;
@@ -462,7 +462,7 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
                                                   itemBuilder: (context, index) => buildCard(
                                                       placeName: snapshot.data[index].placeName,
                                                       placeAddress: snapshot.data[index].placeAddress,
-                                                      CardType: 'loading',
+                                                      cardType: 'loading',
                                                       context: context)
                                               );}),) : Container(),
                                       SizedBox(
@@ -538,7 +538,7 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
                                                   itemBuilder: (context, index) => buildCard(
                                                     placeName: snapshot.data[index].placeName,
                                                     placeAddress: snapshot.data[index].placeAddress,
-                                                    CardType: 'unloading',
+                                                    cardType: 'unloading',
                                                     context: context,)
                                               );}),) : Container(),
                                       SizedBox(
@@ -792,14 +792,14 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
       ),
     );
   }
-  GestureDetector buildCard({BuildContext context, String placeName, String placeAddress, String CardType}) {
+  GestureDetector buildCard({BuildContext context, String placeName, String placeAddress, String cardType}) {
     return GestureDetector(
       onTap: (){
         setState(() {
-          if (CardType == 'loading'){
+          if (cardType == 'loading'){
             locationCards1 = null;
             Provider.of<NewDataByShipper>(context,listen: false).updateLoadingPoint(newValue: '$placeName ($placeAddress)');}
-          else if (CardType =='unloading'){
+          else if (cardType =='unloading'){
             locationCards2 = null;
             Provider.of<NewDataByShipper>(context,listen: false).updateUnloadingPoint(newValue: '$placeName ($placeAddress)');}
         });

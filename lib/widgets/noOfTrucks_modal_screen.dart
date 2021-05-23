@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:Liveasy/widgets/providerData.dart';
 
-Color color_Unselected = Colors.white;
-Color color_Selected = Colors.black45;
-Color color_1 = color_Unselected;
-Color color_2 = color_Unselected;
-Color color_3 = color_Unselected;
-Color color_4 = color_Unselected;
-Color color_5 = color_Unselected;
-Color color_6 = color_Unselected;
-Color color_7 = color_Unselected;
-Color color_8 = color_Unselected;
-Color color_9 = color_Unselected;
-Color color_10 = color_Unselected;
+Color colorUnselected = Colors.white;
+Color colorSelected = Colors.black45;
+Color color_1 = colorUnselected;
+Color color_2 = colorUnselected;
+Color color_3 = colorUnselected;
+Color color_4 = colorUnselected;
+Color color_5 = colorUnselected;
+Color color_6 = colorUnselected;
+Color color_7 = colorUnselected;
+Color color_8 = colorUnselected;
+Color color_9 = colorUnselected;
+Color color_10 = colorUnselected;
 
 class NoOfTrucksWidgetScreen extends StatefulWidget {
   @override
@@ -21,141 +21,141 @@ class NoOfTrucksWidgetScreen extends StatefulWidget {
 }
 
 class _NoOfTrucksWidgetScreenState extends State<NoOfTrucksWidgetScreen> {
-  void invert_all_colour(int cardNumber) {
-    if (cardNumber == 1 && color_1 == color_Unselected) {
-      color_1 = color_Selected;
-      color_2 = color_Unselected;
-      color_3 = color_Unselected;
-      color_4 = color_Unselected;
-      color_5 = color_Unselected;
-      color_6 = color_Unselected;
-      color_7 = color_Unselected;
-      color_8 = color_Unselected;
-      color_9 = color_Unselected;
-      color_10 = color_Unselected;
+  void invertAllColor(int cardNumber) {
+    if (cardNumber == 1 && color_1 == colorUnselected) {
+      color_1 = colorSelected;
+      color_2 = colorUnselected;
+      color_3 = colorUnselected;
+      color_4 = colorUnselected;
+      color_5 = colorUnselected;
+      color_6 = colorUnselected;
+      color_7 = colorUnselected;
+      color_8 = colorUnselected;
+      color_9 = colorUnselected;
+      color_10 = colorUnselected;
       Provider.of<NewDataByShipper>(context, listen: false)
           .updateNoOfTrucks(newValue: '1');
-    } else if (cardNumber == 2 && color_2 == color_Unselected) {
-      color_2 = color_Selected;
-      color_1 = color_Unselected;
-      color_3 = color_Unselected;
-      color_4 = color_Unselected;
-      color_5 = color_Unselected;
-      color_6 = color_Unselected;
-      color_7 = color_Unselected;
-      color_8 = color_Unselected;
-      color_9 = color_Unselected;
-      color_10 = color_Unselected;
+    } else if (cardNumber == 2 && color_2 == colorUnselected) {
+      color_2 = colorSelected;
+      color_1 = colorUnselected;
+      color_3 = colorUnselected;
+      color_4 = colorUnselected;
+      color_5 = colorUnselected;
+      color_6 = colorUnselected;
+      color_7 = colorUnselected;
+      color_8 = colorUnselected;
+      color_9 = colorUnselected;
+      color_10 = colorUnselected;
       Provider.of<NewDataByShipper>(context, listen: false)
           .updateNoOfTrucks(newValue: '2');
-    } else if (cardNumber == 3 && color_3 == color_Unselected) {
-      color_3 = color_Selected;
-      color_2 = color_Unselected;
-      color_1 = color_Unselected;
-      color_4 = color_Unselected;
-      color_5 = color_Unselected;
-      color_6 = color_Unselected;
-      color_7 = color_Unselected;
-      color_8 = color_Unselected;
-      color_9 = color_Unselected;
-      color_10 = color_Unselected;
+    } else if (cardNumber == 3 && color_3 == colorUnselected) {
+      color_3 = colorSelected;
+      color_2 = colorUnselected;
+      color_1 = colorUnselected;
+      color_4 = colorUnselected;
+      color_5 = colorUnselected;
+      color_6 = colorUnselected;
+      color_7 = colorUnselected;
+      color_8 = colorUnselected;
+      color_9 = colorUnselected;
+      color_10 = colorUnselected;
       Provider.of<NewDataByShipper>(context, listen: false)
           .updateNoOfTrucks(newValue: '3');
     }
-    else if (cardNumber == 4 && color_4 == color_Unselected) {
-      color_4 = color_Selected;
-      color_2 = color_Unselected;
-      color_3 = color_Unselected;
-      color_1 = color_Unselected;
-      color_5 = color_Unselected;
-      color_6 = color_Unselected;
-      color_7 = color_Unselected;
-      color_8 = color_Unselected;
-      color_9 = color_Unselected;
-      color_10 = color_Unselected;
+    else if (cardNumber == 4 && color_4 == colorUnselected) {
+      color_4 = colorSelected;
+      color_2 = colorUnselected;
+      color_3 = colorUnselected;
+      color_1 = colorUnselected;
+      color_5 = colorUnselected;
+      color_6 = colorUnselected;
+      color_7 = colorUnselected;
+      color_8 = colorUnselected;
+      color_9 = colorUnselected;
+      color_10 = colorUnselected;
       Provider.of<NewDataByShipper>(context, listen: false)
           .updateNoOfTrucks(newValue: '4');
     }
-    else if (cardNumber == 5 && color_5 == color_Unselected) {
-      color_5 = color_Selected;
-      color_2 = color_Unselected;
-      color_3 = color_Unselected;
-      color_4 = color_Unselected;
-      color_1 = color_Unselected;
-      color_6 = color_Unselected;
-      color_7 = color_Unselected;
-      color_8 = color_Unselected;
-      color_9 = color_Unselected;
-      color_10 = color_Unselected;
+    else if (cardNumber == 5 && color_5 == colorUnselected) {
+      color_5 = colorSelected;
+      color_2 = colorUnselected;
+      color_3 = colorUnselected;
+      color_4 = colorUnselected;
+      color_1 = colorUnselected;
+      color_6 = colorUnselected;
+      color_7 = colorUnselected;
+      color_8 = colorUnselected;
+      color_9 = colorUnselected;
+      color_10 = colorUnselected;
       Provider.of<NewDataByShipper>(context, listen: false)
           .updateNoOfTrucks(newValue: '5');
     }
-    else if (cardNumber == 6 && color_6 == color_Unselected) {
-      color_6 = color_Selected;
-      color_2 = color_Unselected;
-      color_3 = color_Unselected;
-      color_4 = color_Unselected;
-      color_5 = color_Unselected;
-      color_1 = color_Unselected;
-      color_7 = color_Unselected;
-      color_8 = color_Unselected;
-      color_9 = color_Unselected;
-      color_10 = color_Unselected;
+    else if (cardNumber == 6 && color_6 == colorUnselected) {
+      color_6 = colorSelected;
+      color_2 = colorUnselected;
+      color_3 = colorUnselected;
+      color_4 = colorUnselected;
+      color_5 = colorUnselected;
+      color_1 = colorUnselected;
+      color_7 = colorUnselected;
+      color_8 = colorUnselected;
+      color_9 = colorUnselected;
+      color_10 = colorUnselected;
       Provider.of<NewDataByShipper>(context, listen: false)
           .updateNoOfTrucks(newValue: '6');
-    }else if (cardNumber == 7 && color_7 == color_Unselected) {
-      color_7 = color_Selected;
-      color_2 = color_Unselected;
-      color_3 = color_Unselected;
-      color_4 = color_Unselected;
-      color_5 = color_Unselected;
-      color_6 = color_Unselected;
-      color_1 = color_Unselected;
-      color_8 = color_Unselected;
-      color_9 = color_Unselected;
-      color_10 = color_Unselected;
+    }else if (cardNumber == 7 && color_7 == colorUnselected) {
+      color_7 = colorSelected;
+      color_2 = colorUnselected;
+      color_3 = colorUnselected;
+      color_4 = colorUnselected;
+      color_5 = colorUnselected;
+      color_6 = colorUnselected;
+      color_1 = colorUnselected;
+      color_8 = colorUnselected;
+      color_9 = colorUnselected;
+      color_10 = colorUnselected;
       Provider.of<NewDataByShipper>(context, listen: false)
           .updateNoOfTrucks(newValue: '7');
     }
-    else if (cardNumber == 8 && color_8 == color_Unselected) {
-      color_8 = color_Selected;
-      color_2 = color_Unselected;
-      color_3 = color_Unselected;
-      color_4 = color_Unselected;
-      color_5 = color_Unselected;
-      color_6 = color_Unselected;
-      color_7 = color_Unselected;
-      color_1 = color_Unselected;
-      color_9 = color_Unselected;
-      color_10 = color_Unselected;
+    else if (cardNumber == 8 && color_8 == colorUnselected) {
+      color_8 = colorSelected;
+      color_2 = colorUnselected;
+      color_3 = colorUnselected;
+      color_4 = colorUnselected;
+      color_5 = colorUnselected;
+      color_6 = colorUnselected;
+      color_7 = colorUnselected;
+      color_1 = colorUnselected;
+      color_9 = colorUnselected;
+      color_10 = colorUnselected;
       Provider.of<NewDataByShipper>(context, listen: false)
           .updateNoOfTrucks(newValue: '8');
     }
-    else if (cardNumber == 9 && color_9 == color_Unselected) {
-      color_9 = color_Selected;
-      color_2 = color_Unselected;
-      color_3 = color_Unselected;
-      color_4 = color_Unselected;
-      color_5 = color_Unselected;
-      color_6 = color_Unselected;
-      color_7 = color_Unselected;
-      color_8 = color_Unselected;
-      color_1 = color_Unselected;
-      color_10 = color_Unselected;
+    else if (cardNumber == 9 && color_9 == colorUnselected) {
+      color_9 = colorSelected;
+      color_2 = colorUnselected;
+      color_3 = colorUnselected;
+      color_4 = colorUnselected;
+      color_5 = colorUnselected;
+      color_6 = colorUnselected;
+      color_7 = colorUnselected;
+      color_8 = colorUnselected;
+      color_1 = colorUnselected;
+      color_10 = colorUnselected;
       Provider.of<NewDataByShipper>(context, listen: false)
           .updateNoOfTrucks(newValue: '9');
     }
-    else if (cardNumber == 10 && color_10 == color_Unselected) {
-      color_10 = color_Selected;
-      color_2 = color_Unselected;
-      color_3 = color_Unselected;
-      color_4 = color_Unselected;
-      color_5 = color_Unselected;
-      color_6 = color_Unselected;
-      color_7 = color_Unselected;
-      color_8 = color_Unselected;
-      color_9 = color_Unselected;
-      color_1 = color_Unselected;
+    else if (cardNumber == 10 && color_10 == colorUnselected) {
+      color_10 = colorSelected;
+      color_2 = colorUnselected;
+      color_3 = colorUnselected;
+      color_4 = colorUnselected;
+      color_5 = colorUnselected;
+      color_6 = colorUnselected;
+      color_7 = colorUnselected;
+      color_8 = colorUnselected;
+      color_9 = colorUnselected;
+      color_1 = colorUnselected;
       Provider.of<NewDataByShipper>(context, listen: false)
           .updateNoOfTrucks(newValue: '10');
     }
@@ -181,8 +181,8 @@ class _NoOfTrucksWidgetScreenState extends State<NoOfTrucksWidgetScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  buildNoOfTrucksCard(context: context,CardName: '1',CardNumber: 1 ,CardColor: color_1),
-                  buildNoOfTrucksCard(context: context,CardName: '2',CardNumber: 2 ,CardColor: color_2),
+                  buildNoOfTrucksCard(context: context,cardName: '1',cardNumber: 1 ,cardColor: color_1),
+                  buildNoOfTrucksCard(context: context,cardName: '2',cardNumber: 2 ,cardColor: color_2),
                 ],
               ),
             ),
@@ -191,8 +191,8 @@ class _NoOfTrucksWidgetScreenState extends State<NoOfTrucksWidgetScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  buildNoOfTrucksCard(context: context,CardName: '3',CardNumber: 3 ,CardColor: color_3),
-                  buildNoOfTrucksCard(context: context,CardName: '4',CardNumber: 4 ,CardColor: color_4),
+                  buildNoOfTrucksCard(context: context,cardName: '3',cardNumber: 3 ,cardColor: color_3),
+                  buildNoOfTrucksCard(context: context,cardName: '4',cardNumber: 4 ,cardColor: color_4),
 
                 ],
               ),
@@ -202,8 +202,8 @@ class _NoOfTrucksWidgetScreenState extends State<NoOfTrucksWidgetScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  buildNoOfTrucksCard(context: context,CardName: '5',CardNumber: 5 ,CardColor: color_5),
-                  buildNoOfTrucksCard(context: context,CardName: '6',CardNumber: 6 ,CardColor: color_6),
+                  buildNoOfTrucksCard(context: context,cardName: '5',cardNumber: 5 ,cardColor: color_5),
+                  buildNoOfTrucksCard(context: context,cardName: '6',cardNumber: 6 ,cardColor: color_6),
                 ],
               ),
             ),
@@ -212,8 +212,8 @@ class _NoOfTrucksWidgetScreenState extends State<NoOfTrucksWidgetScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  buildNoOfTrucksCard(context: context,CardName: '7',CardNumber: 7 ,CardColor: color_7),
-                  buildNoOfTrucksCard(context: context,CardName: '8',CardNumber: 8 ,CardColor: color_8),
+                  buildNoOfTrucksCard(context: context,cardName: '7',cardNumber: 7 ,cardColor: color_7),
+                  buildNoOfTrucksCard(context: context,cardName: '8',cardNumber: 8 ,cardColor: color_8),
                 ],
               ),
             ),
@@ -222,8 +222,8 @@ class _NoOfTrucksWidgetScreenState extends State<NoOfTrucksWidgetScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  buildNoOfTrucksCard(context: context,CardName: '9',CardNumber: 9 ,CardColor: color_9),
-                  buildNoOfTrucksCard(context: context,CardName: '10',CardNumber: 10 ,CardColor: color_10),
+                  buildNoOfTrucksCard(context: context,cardName: '9',cardNumber: 9 ,cardColor: color_9),
+                  buildNoOfTrucksCard(context: context,cardName: '10',cardNumber: 10 ,cardColor: color_10),
                 ],
               ),
             ),
@@ -233,16 +233,16 @@ class _NoOfTrucksWidgetScreenState extends State<NoOfTrucksWidgetScreen> {
     );
   }
 
-  GestureDetector buildNoOfTrucksCard({BuildContext context, String CardName, int CardNumber, Color CardColor}) {
+  GestureDetector buildNoOfTrucksCard({BuildContext context, String cardName, int cardNumber, Color cardColor}) {
     return GestureDetector(
       onTap: () {
         Navigator.pop(context);
         setState(() {
-          invert_all_colour(CardNumber);
+          invertAllColor(cardNumber);
         });
       },
       child: Container(
-        color: CardColor,
+        color: cardColor,
         height: 70,
         width: 70,
         child: Column(
@@ -250,7 +250,7 @@ class _NoOfTrucksWidgetScreenState extends State<NoOfTrucksWidgetScreen> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-              '$CardName',
+              '$cardName',
               textAlign: TextAlign.center,
             ),
           ],

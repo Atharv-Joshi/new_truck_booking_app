@@ -88,9 +88,9 @@ class _ShipperNewEntryScreenState extends State<ShipperNewEntryScreen> {
         },
         body: body);
     Provider.of<NewDataByShipper>(context,listen: false).clearAll();
-    ProductTypeWidgetScreen().clear_all();
-    TruckTypeWidgetScreen().clear_all();
-    WeightWidgetScreen().clear_all();
+    ProductTypeWidgetScreen().clearAll();
+    TruckTypeWidgetScreen().clearAll();
+    WeightWidgetScreen().clearAll();
     print(response.statusCode);
     if (response.statusCode == 200) {
       final String responseString = response.body;
@@ -100,8 +100,8 @@ class _ShipperNewEntryScreenState extends State<ShipperNewEntryScreen> {
     }
   }
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-  var LocationCards1;
-  var LocationCards2;
+  var locationCards1;
+  var locationCards2;
   DateTime date = DateTime.now();
   void getDate(BuildContext context) async {
     DateTime pickedDate = await showDatePicker(
@@ -168,11 +168,11 @@ class _ShipperNewEntryScreenState extends State<ShipperNewEntryScreen> {
                                       onChanged: (newValue) {
                                         if(newValue.length > 2){print(newValue);
                                         setState(() {
-                                          LocationCards1 = fillCityName(newValue);
+                                          locationCards1 = fillCityName(newValue);
                                         });}
                                         else{
                                           setState(() {
-                                            LocationCards1 = null;
+                                            locationCards1 = null;
                                           });
                                         }
                                       },
@@ -195,18 +195,18 @@ class _ShipperNewEntryScreenState extends State<ShipperNewEntryScreen> {
                                   Container(
                                     child: GestureDetector(onTap:(){setState(() {
                                       Provider.of<NewDataByShipper>(context,listen: false).updateLoadingPoint(newValue: null);
-                                      LocationCards1 = null;
+                                      locationCards1 = null;
                                       controller1 = TextEditingController(text: null);
                                     });} ,child: Icon(Icons.clear,size: 25, color: Colors.black26,)),
                                   )
                                 ],
                               ),
                             ),
-                            LocationCards1 == null ? Container(): SizedBox(height: 20,),
-                            LocationCards1 != null ? Container(
+                            locationCards1 == null ? Container(): SizedBox(height: 20,),
+                            locationCards1 != null ? Container(
                               height: 150,
                               child: FutureBuilder(
-                                future: LocationCards1,
+                                future: locationCards1,
                                 builder: (BuildContext context,  AsyncSnapshot snapshot ){
                                   if (snapshot.data == null) {
                                     return Container(
@@ -226,7 +226,7 @@ class _ShipperNewEntryScreenState extends State<ShipperNewEntryScreen> {
                                       itemBuilder: (context, index) => buildCard(
                                           placeName: snapshot.data[index].placeName,
                                           placeAddress: snapshot.data[index].placeAddress,
-                                          CardType: 'loading',
+                                          cardType: 'loading',
                                           context: context)
                                   );}),) : Container(),
                             SizedBox(
@@ -244,11 +244,11 @@ class _ShipperNewEntryScreenState extends State<ShipperNewEntryScreen> {
                                       onChanged: (newValue) {
                                         if(newValue.length > 2){print(newValue);
                                         setState(() {
-                                          LocationCards2 = fillCityName(newValue);
+                                          locationCards2 = fillCityName(newValue);
                                         });}
                                         else{
                                           setState(() {
-                                            LocationCards2 = null;
+                                            locationCards2 = null;
                                           });
                                         }
                                       },
@@ -271,18 +271,18 @@ class _ShipperNewEntryScreenState extends State<ShipperNewEntryScreen> {
                                   Container(
                                     child: GestureDetector(onTap:(){setState(() {
                                       Provider.of<NewDataByShipper>(context,listen: false).updateUnloadingPoint(newValue: null);
-                                      LocationCards2 = null;
+                                      locationCards2 = null;
                                       controller2= TextEditingController(text: null);
                                     });} ,child: Icon(Icons.clear, size: 25, color: Colors.black26,)),
                                   )
                                 ],
                               ),
                             ),
-                            LocationCards2 == null ? Container(): SizedBox(height: 20,),
-                            LocationCards2 != null ? Container(
+                            locationCards2 == null ? Container(): SizedBox(height: 20,),
+                            locationCards2 != null ? Container(
                               height: 150,
                               child: FutureBuilder(
-                                  future: LocationCards2,
+                                  future: locationCards2,
                                   builder: (BuildContext context,  AsyncSnapshot snapshot ){
                                     if (snapshot.data == null) {
                                       return Container(
@@ -302,7 +302,7 @@ class _ShipperNewEntryScreenState extends State<ShipperNewEntryScreen> {
                                         itemBuilder: (context, index) => buildCard(
                                             placeName: snapshot.data[index].placeName,
                                             placeAddress: snapshot.data[index].placeAddress,
-                                            CardType: 'unloading',
+                                            cardType: 'unloading',
                                             context: context,)
                                     );}),) : Container(),
                             SizedBox(
@@ -515,15 +515,15 @@ class _ShipperNewEntryScreenState extends State<ShipperNewEntryScreen> {
       ),
     );
   }
-  GestureDetector buildCard({BuildContext context, String placeName, String placeAddress, String CardType}) {
+  GestureDetector buildCard({BuildContext context, String placeName, String placeAddress, String cardType}) {
     return GestureDetector(
       onTap: (){
         setState(() {
-          if (CardType == 'loading'){
-          LocationCards1 = null;
+          if (cardType == 'loading'){
+          locationCards1 = null;
           Provider.of<NewDataByShipper>(context,listen: false).updateLoadingPoint(newValue: '$placeName ($placeAddress)');}
-          else if (CardType =='unloading'){
-            LocationCards2 = null;
+          else if (cardType =='unloading'){
+            locationCards2 = null;
             Provider.of<NewDataByShipper>(context,listen: false).updateUnloadingPoint(newValue: '$placeName ($placeAddress)');}
         });
       },
