@@ -38,8 +38,8 @@ class ShipperHomeScreen extends StatefulWidget {
 
 class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
   var jsonData;
-  var LocationCards1;
-  var LocationCards2;
+  var locationCards1;
+  var locationCards2;
   DateTime date = DateTime.now();
   Future<List<LoactionCardsModal>> fillCityName(String cityName) async {
     if (cityName.length > 1) {
@@ -404,11 +404,11 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
                                                 onChanged: (newValue) {
                                                   if(newValue.length > 2){print(newValue);
                                                   setState(() {
-                                                    LocationCards1 = fillCityName(newValue);
+                                                    locationCards1 = fillCityName(newValue);
                                                   });}
                                                   else{
                                                     setState(() {
-                                                      LocationCards1 = null;
+                                                      locationCards1 = null;
                                                     });
                                                   }
                                                 },
@@ -431,18 +431,18 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
                                             Container(
                                               child: GestureDetector(onTap:(){setState(() {
                                                 Provider.of<NewDataByShipper>(context,listen: false).updateLoadingPoint(newValue: null);
-                                                LocationCards1 = null;
+                                                locationCards1 = null;
                                                 controller1 = TextEditingController(text: null);
                                               });} ,child: Icon(Icons.clear,size: 25, color: Colors.black26,)),
                                             )
                                           ],
                                         ),
                                       ),
-                                      LocationCards1 == null ? Container(): SizedBox(height: 20,),
-                                      LocationCards1 != null ? Container(
+                                      locationCards1 == null ? Container(): SizedBox(height: 20,),
+                                      locationCards1 != null ? Container(
                                         height: 150,
                                         child: FutureBuilder(
-                                            future: LocationCards1,
+                                            future: locationCards1,
                                             builder: (BuildContext context,  AsyncSnapshot snapshot ){
                                               if (snapshot.data == null) {
                                                 return Container(
@@ -480,11 +480,11 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
                                                 onChanged: (newValue) {
                                                   if(newValue.length > 2){print(newValue);
                                                   setState(() {
-                                                    LocationCards2 = fillCityName(newValue);
+                                                    locationCards2 = fillCityName(newValue);
                                                   });}
                                                   else{
                                                     setState(() {
-                                                      LocationCards2 = null;
+                                                      locationCards2 = null;
                                                     });
                                                   }
                                                 },
@@ -507,18 +507,18 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
                                             Container(
                                               child: GestureDetector(onTap:(){setState(() {
                                                 Provider.of<NewDataByShipper>(context,listen: false).updateUnloadingPoint(newValue: null);
-                                                LocationCards2 = null;
+                                                locationCards2 = null;
                                                 controller2= TextEditingController(text: null);
                                               });} ,child: Icon(Icons.clear, size: 25, color: Colors.black26,)),
                                             )
                                           ],
                                         ),
                                       ),
-                                      LocationCards2 == null ? Container(): SizedBox(height: 20,),
-                                      LocationCards2 != null ? Container(
+                                      locationCards2 == null ? Container(): SizedBox(height: 20,),
+                                      locationCards2 != null ? Container(
                                         height: 150,
                                         child: FutureBuilder(
-                                            future: LocationCards2,
+                                            future: locationCards2,
                                             builder: (BuildContext context,  AsyncSnapshot snapshot ){
                                               if (snapshot.data == null) {
                                                 return Container(
@@ -797,10 +797,10 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
       onTap: (){
         setState(() {
           if (CardType == 'loading'){
-            LocationCards1 = null;
+            locationCards1 = null;
             Provider.of<NewDataByShipper>(context,listen: false).updateLoadingPoint(newValue: '$placeName ($placeAddress)');}
           else if (CardType =='unloading'){
-            LocationCards2 = null;
+            locationCards2 = null;
             Provider.of<NewDataByShipper>(context,listen: false).updateUnloadingPoint(newValue: '$placeName ($placeAddress)');}
         });
       },
