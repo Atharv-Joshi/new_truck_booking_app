@@ -159,10 +159,10 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
       headers: {HttpHeaders.authorizationHeader: "$token"},);
     print(response.statusCode);
     print(response.body);
-    var adress = jsonDecode(response.body);
-    print(adress);
-    var cityName = adress["copResults"]["city"];
-    var stateName = adress["copResults"]["state"];
+    var address = jsonDecode(response.body);
+    print(address);
+    var cityName = address["copResults"]["city"];
+    var stateName = address["copResults"]["state"];
     city = '$cityName ($stateName)';
     print(city);
     controller1 = TextEditingController(text: city);
