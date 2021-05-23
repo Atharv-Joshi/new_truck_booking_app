@@ -25,7 +25,7 @@ class FlashChat extends StatelessWidget {
           future: Firebase.initializeApp(),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
-              return loading();
+              return Loading();
             }
             if (snapshot.connectionState == ConnectionState.done) {
               return MaterialApp(
@@ -48,13 +48,13 @@ class FlashChat extends StatelessWidget {
                 },
               );
             }
-            return loading();
+            return Loading();
           }),
     );
   }
 }
 
-class loading extends StatelessWidget {
+class Loading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
