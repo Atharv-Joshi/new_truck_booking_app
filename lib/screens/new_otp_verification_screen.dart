@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:ui';
 import 'package:Liveasy/screens/demo.dart';
+import 'package:Liveasy/screens/new_loading_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:pinput/pin_put/pin_put.dart';
 import 'package:Liveasy/widgets/curves.dart';
@@ -16,6 +18,8 @@ class NewOTPVerificationScreen extends StatefulWidget {
 }
 
 class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
+  bool _isLoading = false;
+  bool resendtimeout = false;
   final GlobalKey<ScaffoldState> _scaffoldkey = GlobalKey<ScaffoldState>();
   String _verificationCode = '';
   int _forceResendingToken;
@@ -47,13 +51,13 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
           child: Stack(
             children: [
               ClipPath(
-                clipper: OrangeClipper(),
-                child: Container(
-                  height: MediaQuery.of(context).size.height,
-                  width: MediaQuery.of(context).size.width,
-                  color: const Color(0xffFF9933),
+                  clipper: OrangeClipper(),
+                  child: Container(
+                    height: MediaQuery.of(context).size.height,
+                    width: MediaQuery.of(context).size.width,
+                    color: const Color(0xffFF9933),
+                  ),
                 ),
-              ),
               ClipPath(
                 clipper: GreenClipper(),
                 child: Container(
@@ -114,28 +118,6 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
                             pinAnimationType: PinAnimationType.fade,
                             onSubmit: (pin) async {
                               _smsCode = pin;
-                              // try {
-                              //   await FirebaseAuth.instance
-                              //       .signInWithCredential(
-                              //           PhoneAuthProvider.credential(
-                              //               verificationId: _verificationCode,
-                              //               smsCode: pin))
-                              //       .then((value) async {
-                              //     if (value.user != null) {
-                              //       Navigator.pushAndRemoveUntil(
-                              //           context,
-                              //           MaterialPageRoute(
-                              //               builder: (context) => Demo()),
-                              //           (route) => false);
-                              //     }
-                              //   });
-                              // } catch (e) {
-                              //   FocusScope.of(context).unfocus();
-                              //   _scaffoldkey.currentState
-                              //       // ignore: deprecated_member_use
-                              //       .showSnackBar(
-                              //           SnackBar(content: Text('Invalid OTP')));
-                              // }
                             },
                           ),
                         ),
@@ -147,7 +129,12 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
                                   onPressed: timeOnTimer > 0
                                       ? null
                                       : () {
-                                          Navigator.of(context).pushNamed('/');
+                                          setState(() {
+                                            resendButtonColor = Colors.grey;
+                                            timeOnTimer = 60;
+                                            startTimer();
+                                            resendtimeout = true;
+                                          });
                                         },
                                   child: Text(
                                     'Resend OTP',
@@ -221,7 +208,8 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
                     ),
                   ),
                 ),
-              )
+              ),
+              // NewLoadingScreen()
             ],
           ),
         ),
@@ -232,12 +220,15 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
   @override
   void initState() {
     super.initState();
+    _isLoading = false;
     startTimer();
     _verifyPhoneNumber();
   }
 
   void startTimer() {
     timeOnTimer = 60;
+
+    //remove setstate if needed
     if (_timer != null) {
       _timer.cancel();
     }
@@ -267,30 +258,12 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
             print(user.uid);
           }
           _timer.cancel();
+          // Navigator.pop(context);
           Navigator.pushReplacementNamed(context, '/demo');
         },
         verificationFailed: (FirebaseAuthException e) {
           print(e.message);
         },
-        // codeSent: (String verificationId, int resendToken) async {
-        //   try {
-        //     AuthCredential credential = PhoneAuthProvider.credential(
-        //         verificationId: verificationId,
-        //         smsCode: _pinPutController.text);
-        //     var result =
-        //         await FirebaseAuth.instance.signInWithCredential(credential);
-        //     User user = result.user;
-        //     print(user.uid);
-        //     print('manual login successfull');
-        //   } catch (e) {
-        //     print(e.toString());
-        //   }
-
-        //   // setState(() {
-        //   //   _verificationCode = verficationID;
-        //   // });
-        // },
-
         codeSent: (String verficationId, int resendToken) {
           setState(() {
             _forceResendingToken = resendToken;
@@ -304,6 +277,12 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
         },
         timeout: Duration(seconds: 60));
   }
+
+  // int abc() {
+  //   if (resendtimeout) {
+  //     return _forceResendingToken;
+  //   }
+  // }
 
   void manualVerification() async {
     try {
