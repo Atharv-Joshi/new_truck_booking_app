@@ -18,6 +18,7 @@ class NewOTPVerificationScreen extends StatefulWidget {
 class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
   final GlobalKey<ScaffoldState> _scaffoldkey = GlobalKey<ScaffoldState>();
   String _verificationCode = '';
+  int _forceResendingToken;
   String _smsCode = '';
   final TextEditingController _pinPutController = TextEditingController();
   final FocusNode _pinPutFocusNode = FocusNode();
@@ -193,6 +194,7 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
                                     ),
                                   ),
                                   onPressed: () {
+                                    _timer.cancel();
                                     manualVerification();
                                   },
                                 ),
@@ -253,6 +255,7 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
 
   _verifyPhoneNumber() async {
     await FirebaseAuth.instance.verifyPhoneNumber(
+        forceResendingToken: _forceResendingToken,
         phoneNumber: '+91${widget.phoneNumber}',
         verificationCompleted: (PhoneAuthCredential credential) async {
           UserCredential result =
@@ -263,6 +266,7 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
           if (user != null) {
             print(user.uid);
           }
+          _timer.cancel();
           Navigator.pushReplacementNamed(context, '/demo');
         },
         verificationFailed: (FirebaseAuthException e) {
@@ -289,6 +293,7 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
 
         codeSent: (String verficationId, int resendToken) {
           setState(() {
+            _forceResendingToken = resendToken;
             _verificationCode = verficationId;
           });
         },
