@@ -43,10 +43,10 @@ class _ShipperNewEntryScreenState extends State<ShipperNewEntryScreen> {
   }
   Future<List<LoactionCardsModal>> fillCityName(String cityName) async {
     if (cityName.length > 1) {
-      http.Response tokenGet = await http.post('https://outpost.mapmyindia.com/api/security/oauth/token?grant_type=client_credentials&client_id=33OkryzDZsJmp0siGnK04TeuQrg3DWRxswnTg_VBiHew-2D1tA3oa3fthrGnx4vwbwlbF_xT2T4P9dykuS1GUNmbRb8e5CUgz-RgWDyQspeDCXkXK5Nagw==&client_secret=lrFxI-iSEg9xHXNZXiqUoprc9ZvWP_PDWBDw94qhrze0sUkn7LBDwRNFscpDTVFH7aQT4tu6ycN0492wqPs-ewpjObJ6xuR7iRufmSVcnt9fys5dp0F5jlHLxBEj7oqq');
+      http.Response tokenGet = await http.post(Uri.parse('https://outpost.mapmyindia.com/api/security/oauth/token?grant_type=client_credentials&client_id=33OkryzDZsJmp0siGnK04TeuQrg3DWRxswnTg_VBiHew-2D1tA3oa3fthrGnx4vwbwlbF_xT2T4P9dykuS1GUNmbRb8e5CUgz-RgWDyQspeDCXkXK5Nagw==&client_secret=lrFxI-iSEg9xHXNZXiqUoprc9ZvWP_PDWBDw94qhrze0sUkn7LBDwRNFscpDTVFH7aQT4tu6ycN0492wqPs-ewpjObJ6xuR7iRufmSVcnt9fys5dp0F5jlHLxBEj7oqq'));
       var body = jsonDecode(tokenGet.body);
       var token = body["access_token"];
-      http.Response response1 = await http.get('https://atlas.mapmyindia.com/api/places/search/json?query=$cityName&pod=CITY',
+      http.Response response1 = await http.get(Uri.parse('https://atlas.mapmyindia.com/api/places/search/json?query=$cityName&pod=CITY'),
         headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},);
       print(response1.statusCode);
       var adress = (jsonDecode(response1.body));
@@ -82,7 +82,7 @@ class _ShipperNewEntryScreenState extends State<ShipperNewEntryScreen> {
     };
     String body = json.encode(data);
     final String apiUrl = "http://10.0.2.2:52698/load";
-    final response = await http.post(apiUrl,
+    final response = await http.post(Uri.parse(apiUrl),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },

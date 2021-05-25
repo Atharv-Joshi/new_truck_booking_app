@@ -45,7 +45,7 @@ class ChoiceScreen extends StatelessWidget {
                             color: Color(0xFF6264A7),
                             onPressed: () async {
                               WidgetsFlutterBinding.ensureInitialized();
-                              await Firebase.initializeApp();
+                              // await Firebase.initializeApp();
                               // Navigator.pop(context);
                               Navigator.pushNamed(context, '/login1');
                             },

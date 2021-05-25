@@ -20,7 +20,7 @@ class _TsFoundLoadsScreenState extends State<TsFoundLoadsScreen> {
   var jsonData;
 
   Future<List<CardsModal>> getCardsData() async {
-    http.Response response = await http.get('http://10.0.2.2:52698/load');
+    http.Response response = await http.get(Uri.parse('http://10.0.2.2:52698/load'));
     jsonData = await jsonDecode(response.body);
     print(response.statusCode);
     print(jsonData);
