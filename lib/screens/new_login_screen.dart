@@ -2,6 +2,7 @@ import 'package:Liveasy/screens/new_otp_verification_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:Liveasy/widgets/curves.dart';
 import 'package:get/get.dart';
+import 'package:Liveasy/widgets/card_template.dart';
 
 class NewLoginScreen extends StatefulWidget {
   static final String routeName = '/';
@@ -22,21 +23,8 @@ class _NewLoginScreenState extends State<NewLoginScreen> {
             children: [
               OrangeCurve(),
               GreenCurve(),
-              Container(
-                margin: EdgeInsets.fromLTRB(
-                  MediaQuery.of(context).size.width * 0.06,
-                  MediaQuery.of(context).size.height * 0.2,
-                  MediaQuery.of(context).size.width * 0.06,
-                  MediaQuery.of(context).size.height * 0.3,
-                ),
-                width: MediaQuery.of(context).size.width * 0.88,
-                height: MediaQuery.of(context).size.height * 0.50,
-                child: Card(
-                  shadowColor: Colors.grey[400],
-                  elevation: 10,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20)),
-                  child: Container(
+              CardTemplate(
+                child: Container(
                     padding: EdgeInsets.fromLTRB(20, 80, 16, 20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,12 +107,6 @@ class _NewLoginScreenState extends State<NewLoginScreen> {
                                 ),
                                 onPressed: () {
                                   if (_formKey.currentState.validate()) {
-                                    // Navigator.pushAndRemoveUntil(context,
-                                    //     MaterialPageRoute(builder: (ctx) {
-                                    //   return NewOTPVerificationScreen(
-                                    //       _controller.text);
-                                    // }), (route) => false);
-
                                     Get.to(NewOTPVerificationScreen(
                                         _controller.text));
                                   } // if
@@ -134,8 +116,7 @@ class _NewLoginScreenState extends State<NewLoginScreen> {
                       ],
                     ),
                   ),
-                ),
-              )
+                )
             ],
           ),
         ),

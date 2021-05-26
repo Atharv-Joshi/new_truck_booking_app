@@ -6,6 +6,7 @@ import 'package:pinput/pin_put/pin_put.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:Liveasy/widgets/curves.dart';
+import 'package:Liveasy/widgets/card_template.dart';
 
 class NewOTPVerificationScreen extends StatefulWidget {
   static final routeName = '/otpverification';
@@ -52,22 +53,8 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
             children: [
               OrangeCurve(),
               GreenCurve(),
-              Container(
-                margin: EdgeInsets.fromLTRB(
-                  MediaQuery.of(context).size.width * 0.06,
-                  MediaQuery.of(context).size.height * 0.2,
-                  MediaQuery.of(context).size.width * 0.06,
-                  MediaQuery.of(context).size.height * 0.3,
-                ),
-                width: MediaQuery.of(context).size.width * 0.88,
-                height: MediaQuery.of(context).size.height *
-                    0.55, //originally it was 0.5
-                child: Card(
-                  shadowColor: Colors.grey[400],
-                  elevation: 10,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20)),
-                  child: Container(
+              CardTemplate(
+                child: Container(
                     padding: EdgeInsets.fromLTRB(20, 50, 16, 0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -194,7 +181,6 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
                     ),
                   ),
                 ),
-              ),
               // NewLoadingScreen()
             ],
           ),
