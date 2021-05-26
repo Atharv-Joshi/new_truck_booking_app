@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:ui';
 import 'package:Liveasy/screens/demo.dart';
-import 'package:Liveasy/screens/new_loading_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:pinput/pin_put/pin_put.dart';
-import 'package:Liveasy/widgets/curves.dart';
+import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:Liveasy/widgets/curves.dart';
 
 class NewOTPVerificationScreen extends StatefulWidget {
   static final routeName = '/otpverification';
@@ -50,22 +50,8 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
         child: Center(
           child: Stack(
             children: [
-              ClipPath(
-                  clipper: OrangeClipper(),
-                  child: Container(
-                    height: MediaQuery.of(context).size.height,
-                    width: MediaQuery.of(context).size.width,
-                    color: const Color(0xffFF9933),
-                  ),
-                ),
-              ClipPath(
-                clipper: GreenClipper(),
-                child: Container(
-                  height: MediaQuery.of(context).size.height,
-                  width: MediaQuery.of(context).size.width,
-                  color: const Color(0xff39B82D),
-                ),
-              ),
+              OrangeCurve(),
+              GreenCurve(),
               Container(
                 margin: EdgeInsets.fromLTRB(
                   MediaQuery.of(context).size.width * 0.06,
@@ -126,6 +112,7 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
                             Container(
                               // margin: EdgeInsets.only(right: 1,),
                               child: TextButton(
+                                  // onPressed: (){},
                                   onPressed: timeOnTimer > 0
                                       ? null
                                       : () {
@@ -190,8 +177,7 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
                             Container(
                               child: TextButton(
                                 onPressed: () {
-                                  // manualVerification();
-                                  Navigator.pushReplacementNamed(context, '/');
+                                  Get.back();
                                 },
                                 child: Text(
                                   'Want to change number',
@@ -252,8 +238,6 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
           UserCredential result =
               await FirebaseAuth.instance.signInWithCredential(credential);
           User user = result.user;
-          print(user);
-          print('Auto login successfull');
           if (user != null) {
             print(user.uid);
           }
@@ -271,9 +255,11 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
           });
         },
         codeAutoRetrievalTimeout: (String verificationID) {
-          setState(() {
-            _verificationCode = verificationID;
-          });
+          if (mounted) {
+            setState(() {
+              _verificationCode = verificationID;
+            });
+          }
         },
         timeout: Duration(seconds: 60));
   }
@@ -291,17 +277,21 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
               verificationId: _verificationCode, smsCode: _smsCode))
           .then((value) async {
         if (value.user != null) {
-          Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => Demo()),
-              (route) => false);
+          Get.offAll(Demo());
         }
       });
     } catch (e) {
       FocusScope.of(context).unfocus();
-      _scaffoldkey.currentState
-          // ignore: deprecated_member_use
-          .showSnackBar(SnackBar(content: Text('Invalid OTP')));
+      // _scaffoldkey.currentState
+      //     // ignore: deprecated_member_use
+      //     .showSnackBar(SnackBar(content: Text('Invalid OTP')));
+
+          Get.snackbar(
+            'Invalid Otp',
+            'Please Enter the correct OTP',
+            colorText: Colors.white,
+            backgroundColor: Colors.black87);
     }
+    
   }
 } // class end

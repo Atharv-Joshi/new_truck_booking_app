@@ -1,6 +1,7 @@
 import 'package:Liveasy/screens/new_otp_verification_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:Liveasy/widgets/curves.dart';
+import 'package:get/get.dart';
 
 class NewLoginScreen extends StatefulWidget {
   static final String routeName = '/';
@@ -19,22 +20,8 @@ class _NewLoginScreenState extends State<NewLoginScreen> {
         child: Center(
           child: Stack(
             children: [
-              ClipPath(
-                clipper: OrangeClipper(),
-                child: Container(
-                  height: MediaQuery.of(context).size.height,
-                  width: MediaQuery.of(context).size.width,
-                  color: const Color(0xffFF9933),
-                ),
-              ),
-              ClipPath(
-                clipper: GreenClipper(),
-                child: Container(
-                  height: MediaQuery.of(context).size.height,
-                  width: MediaQuery.of(context).size.width,
-                  color: const Color(0xff39B82D),
-                ),
-              ),
+              OrangeCurve(),
+              GreenCurve(),
               Container(
                 margin: EdgeInsets.fromLTRB(
                   MediaQuery.of(context).size.width * 0.06,
@@ -132,18 +119,14 @@ class _NewLoginScreenState extends State<NewLoginScreen> {
                                 ),
                                 onPressed: () {
                                   if (_formKey.currentState.validate()) {
-                                    print(_controller.text);
-                                    // Navigator.of(context).pushReplacement(
-                                    //     MaterialPageRoute(builder: (context) {
+                                    // Navigator.pushAndRemoveUntil(context,
+                                    //     MaterialPageRoute(builder: (ctx) {
                                     //   return NewOTPVerificationScreen(
                                     //       _controller.text);
-                                    // }));
+                                    // }), (route) => false);
 
-                                    Navigator.pushAndRemoveUntil(context,
-                                        MaterialPageRoute(builder: (ctx) {
-                                      return NewOTPVerificationScreen(
-                                          _controller.text);
-                                    }), (route) => false);
+                                    Get.to(NewOTPVerificationScreen(
+                                        _controller.text));
                                   } // if
                                 }),
                           ),
