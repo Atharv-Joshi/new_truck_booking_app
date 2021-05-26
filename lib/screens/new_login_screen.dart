@@ -107,7 +107,7 @@ class _NewLoginScreenState extends State<NewLoginScreen> {
                                 ),
                                 onPressed: () {
                                   if (_formKey.currentState.validate()) {
-                                    Get.to(NewOTPVerificationScreen(
+                                    Get.to(() => NewOTPVerificationScreen(
                                         _controller.text));
                                   } // if
                                 }),

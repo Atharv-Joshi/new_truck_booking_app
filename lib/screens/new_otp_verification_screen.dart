@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:ui';
 import 'package:Liveasy/screens/demo.dart';
+import 'package:Liveasy/screens/new_loading_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:pinput/pin_put/pin_put.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -19,7 +21,8 @@ class NewOTPVerificationScreen extends StatefulWidget {
 }
 
 class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
-  bool _isLoading = false;
+  bool showProgressHud = false;
+  // bool _isLoading = false;
   bool resendtimeout = false;
   final GlobalKey<ScaffoldState> _scaffoldkey = GlobalKey<ScaffoldState>();
   String _verificationCode = '';
@@ -27,6 +30,7 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
   String _smsCode = '';
   final TextEditingController _pinPutController = TextEditingController();
   final FocusNode _pinPutFocusNode = FocusNode();
+
   final BoxDecoration pinPutDecoration = BoxDecoration(
     boxShadow: [
       BoxShadow(
@@ -47,14 +51,19 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldkey,
-      body: SingleChildScrollView(
-        child: Center(
-          child: Stack(
-            children: [
-              OrangeCurve(),
-              GreenCurve(),
-              CardTemplate(
-                child: Container(
+      body: ModalProgressHUD(
+        progressIndicator: CircularProgressIndicator(
+          valueColor: new AlwaysStoppedAnimation<Color>(Colors.black),
+        ),
+        inAsyncCall: showProgressHud,
+        child: SingleChildScrollView(
+          child: Center(
+            child: Stack(
+              children: [
+                OrangeCurve(),
+                GreenCurve(),
+                CardTemplate(
+                  child: Container(
                     padding: EdgeInsets.fromLTRB(20, 50, 16, 0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -97,9 +106,7 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
                         Row(
                           children: [
                             Container(
-                              // margin: EdgeInsets.only(right: 1,),
                               child: TextButton(
-                                  // onPressed: (){},
                                   onPressed: timeOnTimer > 0
                                       ? null
                                       : () {
@@ -155,6 +162,9 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
                                     ),
                                   ),
                                   onPressed: () {
+                                    showProgressHud = true;
+                                    print(
+                                        'hud true due to pressing of confirm button');
                                     _timer.cancel();
                                     manualVerification();
                                   },
@@ -181,8 +191,9 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
                     ),
                   ),
                 ),
-              // NewLoadingScreen()
-            ],
+                // NewLoadingScreen()
+              ],
+            ),
           ),
         ),
       ),
@@ -192,7 +203,12 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
   @override
   void initState() {
     super.initState();
-    _isLoading = false;
+    setState(() {
+      print('hud true due to initstate');
+      showProgressHud = true;
+    });
+
+    // _isLoading = false;
     startTimer();
     _verifyPhoneNumber();
   }
@@ -228,10 +244,18 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
             print(user.uid);
           }
           _timer.cancel();
-          // Navigator.pop(context);
-          Navigator.pushReplacementNamed(context, '/demo');
+          setState(() {
+            print('hud false due to verificationCompleted');
+            showProgressHud = false;
+          });
+
+          Get.offAll(() => Demo());
         },
         verificationFailed: (FirebaseAuthException e) {
+          setState(() {
+            print('hud false due to verificationFailed');
+            showProgressHud = false;
+          });
           print(e.message);
         },
         codeSent: (String verficationId, int resendToken) {
@@ -240,21 +264,18 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
             _verificationCode = verficationId;
           });
         },
-        codeAutoRetrievalTimeout: (String verificationID) {
+        codeAutoRetrievalTimeout: (String verificationId) {
           if (mounted) {
             setState(() {
-              _verificationCode = verificationID;
+              // closes the loading screen after 60 seconds in autoverfii doesnt work .. works fine.
+              print('hud false due to codeAutoRetrievalTimeout');
+              showProgressHud = false;
+              _verificationCode = verificationId;
             });
           }
         },
         timeout: Duration(seconds: 60));
   }
-
-  // int abc() {
-  //   if (resendtimeout) {
-  //     return _forceResendingToken;
-  //   }
-  // }
 
   void manualVerification() async {
     try {
@@ -263,21 +284,21 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
               verificationId: _verificationCode, smsCode: _smsCode))
           .then((value) async {
         if (value.user != null) {
-          Get.offAll(Demo());
+          setState(() {
+            print('hud false due to try in manual verification');
+            showProgressHud = false;
+          });
+          Get.offAll(() => Demo());
         }
       });
     } catch (e) {
       FocusScope.of(context).unfocus();
-      // _scaffoldkey.currentState
-      //     // ignore: deprecated_member_use
-      //     .showSnackBar(SnackBar(content: Text('Invalid OTP')));
-
-          Get.snackbar(
-            'Invalid Otp',
-            'Please Enter the correct OTP',
-            colorText: Colors.white,
-            backgroundColor: Colors.black87);
+      setState(() {
+        print('hud false due to catch in manual verification');
+        showProgressHud = false;
+      });
+      Get.snackbar('Invalid Otp', 'Please Enter the correct OTP',
+          colorText: Colors.white, backgroundColor: Colors.black87);
     }
-    
   }
 } // class end
