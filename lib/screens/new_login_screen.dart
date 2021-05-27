@@ -60,7 +60,7 @@ class _NewLoginScreenState extends State<NewLoginScreen> {
                                 });
                               } else {
                                 setState(() {
-                                  phoneControllerLengthCheck = true;
+                                  phoneControllerLengthCheck = false;
                                   buttonColor =
                                       MaterialStateProperty.all<Color>(
                                           Colors.grey);

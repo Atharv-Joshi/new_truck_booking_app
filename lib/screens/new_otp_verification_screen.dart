@@ -8,7 +8,7 @@ import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:Liveasy/widgets/curves.dart';
 import 'package:Liveasy/widgets/card_template.dart';
-import 'package:Liveasy/getxcontrollers/getx_controllers.dart';
+
 import 'package:Liveasy/Services/auth_functions.dart';
 
 class NewOTPVerificationScreen extends StatefulWidget {
@@ -22,9 +22,8 @@ class NewOTPVerificationScreen extends StatefulWidget {
 }
 
 class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
-  AuthFunctions authFunctions = AuthFunctions();
+  AuthService authService = AuthService();
 
-  HudController hudController = HudController();
   bool showProgressHud = false;
   bool resendtimeout = false;
   final GlobalKey<ScaffoldState> _scaffoldkey = GlobalKey<ScaffoldState>();
@@ -46,8 +45,12 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
     ),
   );
 
+  dynamic buttonColor = MaterialStateProperty.all<Color>(Colors.grey);
+
   TimerController timerController = Get.put(TimerController());
   Color resendButtonColor = Colors.grey;
+  dynamic confirmButtonColor = MaterialStateProperty.all<Color>(Colors.grey);
+  bool pinLengthCheck = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,8 +103,25 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
                             selectedFieldDecoration: pinPutDecoration,
                             followingFieldDecoration: pinPutDecoration,
                             pinAnimationType: PinAnimationType.fade,
-                            onSubmit: (pin) async {
-                              _smsCode = pin;
+                            // onSubmit: (pin) async {
+                            //   _smsCode = pin;
+                            onChanged: (pin) async {
+                              if (pin.length == 6) {
+                                setState(() {
+                                  pinLengthCheck = true;
+                                  _smsCode = pin;
+                                  buttonColor =
+                                      MaterialStateProperty.all<Color>(
+                                          Color(0xff33364D));
+                                });
+                              } else {
+                                setState(() {
+                                  pinLengthCheck = false;
+                                  buttonColor =
+                                      MaterialStateProperty.all<Color>(
+                                          Colors.grey);
+                                });
+                              }
                             },
                           ),
                         ),
@@ -156,29 +176,31 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(50),
                                 child: ElevatedButton(
-                                  style: ButtonStyle(
-                                    backgroundColor:
-                                        MaterialStateProperty.all<Color>(
-                                            Color(0xff33364D)),
-                                  ),
-                                  child: Text(
-                                    'Confirm',
-                                    style: TextStyle(
-                                      color: const Color(0xffFFFFFF),
+                                    style: ButtonStyle(
+                                      backgroundColor: buttonColor,
                                     ),
-                                  ),
-                                  onPressed: () {
-                                    // hudController.updateHudController(true);
-                                    setState(() {
-                                      showProgressHud = true;
-                                    });
-                                    print(
-                                        'hud true due to pressing of confirm button');
-                                    timerController.cancelTimer();
-                                    // authFunctions.manualVerification(_smsCode);
-                                    manualVerification();
-                                  },
-                                ),
+                                    child: Text(
+                                      'Confirm',
+                                      style: TextStyle(
+                                        color: const Color(0xffFFFFFF),
+                                      ),
+                                    ),
+                                    onPressed: pinLengthCheck
+                                        ? () {
+                                            // hudController.updateHudController(true);
+                                            // setState(() {
+                                            //   showProgressHud = true;
+                                            // });
+                                            print(
+                                                'hud true due to pressing of confirm button');
+                                            timerController.cancelTimer();
+                                            authService.manualVerification(
+                                                smsCode: _smsCode,
+                                                verificationId:
+                                                    _verificationCode);
+                                            // manualVerification();
+                                          }
+                                        : null),
                               ),
                             ),
                             Container(
@@ -225,6 +247,7 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
 
   _verifyPhoneNumber() async {
     await FirebaseAuth.instance.verifyPhoneNumber(
+        //this value changes runtime
         forceResendingToken: _forceResendingToken,
         phoneNumber: '+91${widget.phoneNumber}',
         verificationCompleted: (PhoneAuthCredential credential) async {
@@ -234,14 +257,11 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
           if (user != null) {
             print(user.uid);
           }
-          // _timer.cancel();
           timerController.cancelTimer();
           setState(() {
             print('hud false due to verificationCompleted');
-
             showProgressHud = false;
           });
-
           Get.offAll(() => Demo());
         },
         verificationFailed: (FirebaseAuthException e) {
@@ -270,32 +290,5 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
           }
         },
         timeout: Duration(seconds: 60));
-  }
-
-  void manualVerification() async {
-    try {
-      await FirebaseAuth.instance
-          .signInWithCredential(PhoneAuthProvider.credential(
-              verificationId: _verificationCode, smsCode: _smsCode))
-          .then((value) async {
-        if (value.user != null) {
-          setState(() {
-            print('hud false due to try in manual verification');
-            // hudController.updateHudController(false);
-            showProgressHud = false;
-          });
-          Get.offAll(() => Demo());
-        }
-      });
-    } catch (e) {
-      FocusScope.of(context).unfocus();
-      setState(() {
-        print('hud false due to catch in manual verification');
-        // hudController.updateHudController(false);
-        showProgressHud = false;
-      });
-      Get.snackbar('Invalid Otp', 'Please Enter the correct OTP',
-          colorText: Colors.white, backgroundColor: Colors.black87);
-    }
   }
 } // class end
