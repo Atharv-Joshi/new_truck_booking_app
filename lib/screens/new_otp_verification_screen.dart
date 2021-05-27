@@ -246,49 +246,55 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
   }
 
   _verifyPhoneNumber() async {
-    await FirebaseAuth.instance.verifyPhoneNumber(
-        //this value changes runtime
-        forceResendingToken: _forceResendingToken,
-        phoneNumber: '+91${widget.phoneNumber}',
-        verificationCompleted: (PhoneAuthCredential credential) async {
-          UserCredential result =
-              await FirebaseAuth.instance.signInWithCredential(credential);
-          User user = result.user;
-          if (user != null) {
-            print(user.uid);
-          }
-          timerController.cancelTimer();
-          setState(() {
-            print('hud false due to verificationCompleted');
-            showProgressHud = false;
-          });
-          Get.offAll(() => Demo());
-        },
-        verificationFailed: (FirebaseAuthException e) {
-          setState(() {
-            print('hud false due to verificationFailed');
-            // hudController.updateHudController(false);
-            showProgressHud = false;
-          });
-          print(e.message);
-        },
-        codeSent: (String verficationId, int resendToken) {
-          setState(() {
-            _forceResendingToken = resendToken;
-            _verificationCode = verficationId;
-          });
-        },
-        codeAutoRetrievalTimeout: (String verificationId) {
-          if (mounted) {
+    try {
+      await FirebaseAuth.instance.verifyPhoneNumber(
+          //this value changes runtime
+          forceResendingToken: _forceResendingToken,
+          phoneNumber: '+91${widget.phoneNumber}',
+          verificationCompleted: (PhoneAuthCredential credential) async {
+            UserCredential result =
+                await FirebaseAuth.instance.signInWithCredential(credential);
+            User user = result.user;
+            if (user != null) {
+              print(user.uid);
+            }
+            timerController.cancelTimer();
             setState(() {
-              // closes the loading screen after 60 seconds in autoverfii doesnt work .. works fine.
-              print('hud false due to codeAutoRetrievalTimeout');
+              print('hud false due to verificationCompleted');
+              showProgressHud = false;
+            });
+            Get.offAll(() => Demo());
+          },
+          verificationFailed: (FirebaseAuthException e) {
+            setState(() {
+              print('hud false due to verificationFailed');
               // hudController.updateHudController(false);
               showProgressHud = false;
-              _verificationCode = verificationId;
             });
-          }
-        },
-        timeout: Duration(seconds: 60));
+            print(e.message);
+          },
+          codeSent: (String verficationId, int resendToken) {
+            setState(() {
+              _forceResendingToken = resendToken;
+              _verificationCode = verficationId;
+            });
+          },
+          codeAutoRetrievalTimeout: (String verificationId) {
+            if (mounted) {
+              setState(() {
+                // closes the loading screen after 60 seconds in autoverfii doesnt work .. works fine.
+                print('hud false due to codeAutoRetrievalTimeout');
+                // hudController.updateHudController(false);
+                showProgressHud = false;
+                _verificationCode = verificationId;
+              });
+            }
+          },
+          timeout: Duration(seconds: 60));
+    } catch (e) {
+      setState(() {
+        showProgressHud = false;
+      });
+    }
   }
 } // class end
