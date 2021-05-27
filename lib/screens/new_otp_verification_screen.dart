@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:ui';
+import 'package:Liveasy/getxcontrollers/timer_controller.dart';
 import 'package:Liveasy/screens/demo.dart';
 import 'package:Liveasy/screens/new_loading_screen.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,10 @@ import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:Liveasy/widgets/curves.dart';
 import 'package:Liveasy/widgets/card_template.dart';
+import 'package:Liveasy/getxcontrollers/getx_controllers.dart';
+import 'package:Liveasy/Services/auth_functions.dart';
+import 'package:provider/provider.dart';
+import 'package:Liveasy/providers/provider_data.dart';
 
 class NewOTPVerificationScreen extends StatefulWidget {
   static final routeName = '/otpverification';
@@ -21,8 +26,10 @@ class NewOTPVerificationScreen extends StatefulWidget {
 }
 
 class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
+  AuthFunctions authFunctions = AuthFunctions();
+
+  HudController hudController = HudController();
   bool showProgressHud = false;
-  // bool _isLoading = false;
   bool resendtimeout = false;
   final GlobalKey<ScaffoldState> _scaffoldkey = GlobalKey<ScaffoldState>();
   String _verificationCode = '';
@@ -43,9 +50,7 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
     ),
   );
 
-  int timeOnTimer;
-  Timer _timer;
-
+  TimerController timerController = Get.put(TimerController());
   Color resendButtonColor = Colors.grey;
   @override
   Widget build(BuildContext context) {
@@ -55,7 +60,8 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
         progressIndicator: CircularProgressIndicator(
           valueColor: new AlwaysStoppedAnimation<Color>(Colors.black),
         ),
-        inAsyncCall: showProgressHud,
+        // inAsyncCall: showProgressHud,
+        inAsyncCall: hudController.hudController.value,
         child: SingleChildScrollView(
           child: Center(
             child: Stack(
@@ -107,16 +113,17 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
                           children: [
                             Container(
                               child: TextButton(
-                                  onPressed: timeOnTimer > 0
-                                      ? null
-                                      : () {
-                                          setState(() {
-                                            resendButtonColor = Colors.grey;
-                                            timeOnTimer = 60;
-                                            startTimer();
-                                            resendtimeout = true;
-                                          });
-                                        },
+                                  onPressed:
+                                      timerController.timeOnTimer.value > 0
+                                          ? null
+                                          : () {
+                                              setState(() {
+                                                resendButtonColor = Colors.grey;
+                                                timerController.startTimer();
+                                                // hudController
+                                                //     .updateHudController(true);
+                                              });
+                                            },
                                   child: Text(
                                     'Resend OTP',
                                     style: TextStyle(
@@ -130,11 +137,13 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
                               margin: EdgeInsets.fromLTRB(20, 0, 0, 0),
                               child: Row(
                                 children: [
-                                  Text(
-                                    'Remaining time :  $timeOnTimer',
-                                    style: TextStyle(
-                                        color: const Color(0xff109E92)),
-                                  ),
+                                  Obx(
+                                    () => Text(
+                                      'Remaining time :  ${timerController.timeOnTimer}',
+                                      style: TextStyle(
+                                          color: const Color(0xff109E92)),
+                                    ),
+                                  )
                                 ],
                               ),
                             )
@@ -162,10 +171,12 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
                                     ),
                                   ),
                                   onPressed: () {
-                                    showProgressHud = true;
+                                    // hudController.updateHudController(true);
                                     print(
                                         'hud true due to pressing of confirm button');
-                                    _timer.cancel();
+                                    timerController.cancelTimer();
+                                    // manualVerification(_smsCode);
+                                    // authFunctions.manualVerification(_smsCode);
                                     manualVerification();
                                   },
                                 ),
@@ -191,7 +202,6 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
                     ),
                   ),
                 ),
-                // NewLoadingScreen()
               ],
             ),
           ),
@@ -203,33 +213,12 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
   @override
   void initState() {
     super.initState();
-    setState(() {
-      print('hud true due to initstate');
-      showProgressHud = true;
-    });
+    timerController.startTimer();
+    print('hud true due to initstate');
+    // hudController.updateHudController(true);
 
-    // _isLoading = false;
-    startTimer();
     _verifyPhoneNumber();
-  }
-
-  void startTimer() {
-    timeOnTimer = 60;
-
-    //remove setstate if needed
-    if (_timer != null) {
-      _timer.cancel();
-    }
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      setState(() {
-        if (timeOnTimer > 0) {
-          timeOnTimer--;
-        } else {
-          _timer.cancel();
-          resendButtonColor = const Color(0xff109E92);
-        }
-      });
-    });
+    // authFunctions.verifyPhoneNumber(widget.phoneNumber);
   }
 
   _verifyPhoneNumber() async {
@@ -243,10 +232,11 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
           if (user != null) {
             print(user.uid);
           }
-          _timer.cancel();
+          // _timer.cancel();
+          timerController.cancelTimer();
           setState(() {
             print('hud false due to verificationCompleted');
-            showProgressHud = false;
+            // hudController.updateHudController(false);
           });
 
           Get.offAll(() => Demo());
@@ -254,7 +244,7 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
         verificationFailed: (FirebaseAuthException e) {
           setState(() {
             print('hud false due to verificationFailed');
-            showProgressHud = false;
+            // hudController.updateHudController(false);
           });
           print(e.message);
         },
@@ -269,7 +259,7 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
             setState(() {
               // closes the loading screen after 60 seconds in autoverfii doesnt work .. works fine.
               print('hud false due to codeAutoRetrievalTimeout');
-              showProgressHud = false;
+              // hudController.updateHudController(false);
               _verificationCode = verificationId;
             });
           }
@@ -286,7 +276,7 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
         if (value.user != null) {
           setState(() {
             print('hud false due to try in manual verification');
-            showProgressHud = false;
+            // hudController.updateHudController(false);
           });
           Get.offAll(() => Demo());
         }
@@ -295,7 +285,7 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
       FocusScope.of(context).unfocus();
       setState(() {
         print('hud false due to catch in manual verification');
-        showProgressHud = false;
+        // hudController.updateHudController(false);
       });
       Get.snackbar('Invalid Otp', 'Please Enter the correct OTP',
           colorText: Colors.white, backgroundColor: Colors.black87);

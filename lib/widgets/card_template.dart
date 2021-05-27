@@ -19,7 +19,7 @@ class _CardTemplateState extends State<CardTemplate> {
           MediaQuery.of(context).size.height * 0.3,
         ),
         width: MediaQuery.of(context).size.width * 0.88,
-        height: MediaQuery.of(context).size.height * 0.50,
+        height: MediaQuery.of(context).size.height * 0.55,
         child: Card(
           shadowColor: Colors.grey[400],
           elevation: 10,
