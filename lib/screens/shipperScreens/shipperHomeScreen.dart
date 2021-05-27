@@ -1,11 +1,7 @@
 import 'package:Liveasy/screens/shipperOrTransporterChoiceScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:geocoder/geocoder.dart';
-import 'package:location_permissions/location_permissions.dart';
 import 'dart:convert';
-import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:Liveasy/models/loadDataModel.dart';
@@ -114,34 +110,34 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
   void getCurrentLocation() async {
 
 
-    PermissionStatus permission1 =
-        await LocationPermissions().checkPermissionStatus();
-    if (permission1 != PermissionStatus.granted){
-      permission1 = await LocationPermissions().requestPermissions();
-    }
-
-    var position = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-    print(position.latitude);
-    print(position);
-    final coordinates = new Coordinates(position.latitude, position.longitude);
-    var addresses =
-        await Geocoder.local.findAddressesFromCoordinates(coordinates);
-    var first = addresses.first;
-    print(first.addressLine);
-    http.Response tokenGet = await http.post('https://outpost.mapmyindia.com/api/security/oauth/token?grant_type=client_credentials&client_id=33OkryzDZsJmp0siGnK04TeuQrg3DWRxswnTg_VBiHew-2D1tA3oa3fthrGnx4vwbwlbF_xT2T4P9dykuS1GUNmbRb8e5CUgz-RgWDyQspeDCXkXK5Nagw==&client_secret=lrFxI-iSEg9xHXNZXiqUoprc9ZvWP_PDWBDw94qhrze0sUkn7LBDwRNFscpDTVFH7aQT4tu6ycN0492wqPs-ewpjObJ6xuR7iRufmSVcnt9fys5dp0F5jlHLxBEj7oqq');
-    print(tokenGet.statusCode);
-    print(tokenGet.body);
-    var body = jsonDecode(tokenGet.body);
-    var token = body["access_token"];
-    http.Response response = await http.get('https://atlas.mapmyindia.com/api/places/geocode?address=${first.addressLine}',
-      headers: {HttpHeaders.authorizationHeader: "$token"},);
-    print(response.statusCode);
-    print(response.body);
-    var adress = jsonDecode(response.body);
-    print(adress);
-    var cityName = adress["copResults"]["city"];
-    var stateName = adress["copResults"]["state"];
-    city = '$cityName ($stateName)';
+    // PermissionStatus permission1 =
+    //     await LocationPermissions().checkPermissionStatus();
+    // if (permission1 != PermissionStatus.granted){
+    //   permission1 = await LocationPermissions().requestPermissions();
+    // }
+    //
+    // var position = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    // print(position.latitude);
+    // print(position);
+    // final coordinates = new Coordinates(position.latitude, position.longitude);
+    // var addresses =
+    //     await Geocoder.local.findAddressesFromCoordinates(coordinates);
+    // var first = addresses.first;
+    // print(first.addressLine);
+    // http.Response tokenGet = await http.post('https://outpost.mapmyindia.com/api/security/oauth/token?grant_type=client_credentials&client_id=33OkryzDZsJmp0siGnK04TeuQrg3DWRxswnTg_VBiHew-2D1tA3oa3fthrGnx4vwbwlbF_xT2T4P9dykuS1GUNmbRb8e5CUgz-RgWDyQspeDCXkXK5Nagw==&client_secret=lrFxI-iSEg9xHXNZXiqUoprc9ZvWP_PDWBDw94qhrze0sUkn7LBDwRNFscpDTVFH7aQT4tu6ycN0492wqPs-ewpjObJ6xuR7iRufmSVcnt9fys5dp0F5jlHLxBEj7oqq');
+    // print(tokenGet.statusCode);
+    // print(tokenGet.body);
+    // var body = jsonDecode(tokenGet.body);
+    // var token = body["access_token"];
+    // http.Response response = await http.get('https://atlas.mapmyindia.com/api/places/geocode?address=${first.addressLine}',
+    //   headers: {HttpHeaders.authorizationHeader: "$token"},);
+    // print(response.statusCode);
+    // print(response.body);
+    // var adress = jsonDecode(response.body);
+    // print(adress);
+    // var cityName = adress["copResults"]["city"];
+    // var stateName = adress["copResults"]["state"];
+    // city = '$cityName ($stateName)';
     print(city);
     controller1 = TextEditingController(text: city);
     Provider.of<ProviderData>(context,listen: false).updateLoadingPoint(newValue: city);
@@ -394,7 +390,8 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
                                                 Provider.of<ProviderData>(context,listen: false).updateLoadingPoint(newValue: null);
                                                 locationCard1 = null;
                                                 controller1 = TextEditingController(text: null);
-                                              });} ,child: Icon(Icons.clear,size: 25, color: Colors.black26,)),
+                                              });} ,child: Icon(Icons.clear,size: 25, color: Colors.black26,),
+                                              ),
                                             )
                                           ],
                                         ),

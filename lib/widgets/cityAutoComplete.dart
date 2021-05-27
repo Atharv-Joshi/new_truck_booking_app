@@ -29,8 +29,7 @@ Future<List<LocationCardsModal>> fillCityName(String cityName) async {
       locationCardsModal.placeAddress = json["placeAddress"];
       card.add(locationCardsModal);
     }
-    card = card
-      ..sort(
+    card = card..sort(
           (a, b) => a.placeName.toString().compareTo(b.placeName.toString()));
     return card;
   }

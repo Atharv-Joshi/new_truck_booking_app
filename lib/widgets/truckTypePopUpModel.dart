@@ -2,86 +2,37 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:Liveasy/models/providerData.dart';
-Color color_Unselected = Colors.white;
-Color color_Selected = Colors.black45;
-Color color_1 = color_Unselected;
-Color color_2 = color_Unselected;
-Color color_3 = color_Unselected;
-Color color_4 = color_Unselected;
-Color color_5 = color_Unselected;
-Color color_6 = color_Unselected;
+Color unselectedColor = Colors.white;
+Color selectedColor = Colors.black45;
+List<Color> color = [
+  unselectedColor,
+  unselectedColor,
+  unselectedColor,
+  unselectedColor,
+  unselectedColor,
+  unselectedColor
+];
+
+int n = 6;
+
 class TruckTypeWidgetScreen extends StatefulWidget {
   void clearAll(){
-    color_1 = color_Unselected;
-    color_2 = color_Unselected;
-    color_3 = color_Unselected;
-    color_4 = color_Unselected;
-    color_5 = color_Unselected;
-    color_6 = color_Unselected;
+    for (int i = 0; i < n; i++) {
+      color[i] = unselectedColor;
+    }
   }
   @override
   _TruckTypeWidgetScreenState createState() => _TruckTypeWidgetScreenState();
 }
 class _TruckTypeWidgetScreenState extends State<TruckTypeWidgetScreen> {
-  void invertAllColour(int cardNumber) {
-    if (cardNumber == 1 && color_1 == color_Unselected) {
-      color_1 = color_Selected;
-      color_2 = color_Unselected;
-      color_3 = color_Unselected;
-      color_4 = color_Unselected;
-      color_5 = color_Unselected;
-      color_6 = color_Unselected;
-      Provider.of<ProviderData>(context, listen: false)
-          .updateTruckPreference(newValue: 'Container');
-    } else if (cardNumber == 2 && color_2 == color_Unselected) {
-      color_2 = color_Selected;
-      color_1 = color_Unselected;
-      color_3 = color_Unselected;
-      color_4 = color_Unselected;
-      color_5 = color_Unselected;
-      color_6 = color_Unselected;
-      Provider.of<ProviderData>(context, listen: false)
-          .updateTruckPreference(newValue: 'Hyva');
-    } else if (cardNumber == 3 && color_3 == color_Unselected) {
-      color_3 = color_Selected;
-      color_2 = color_Unselected;
-      color_1 = color_Unselected;
-      color_4 = color_Unselected;
-      color_5 = color_Unselected;
-      color_6 = color_Unselected;
-      Provider.of<ProviderData>(context, listen: false)
-          .updateTruckPreference(newValue: 'LCV');
+  void invertAllColour(int cardNumber, String cardValue) {
+    for (int i = 0; i < n; i++) {
+      color[i] = unselectedColor;
     }
-    else if (cardNumber == 4 && color_4 == color_Unselected) {
-      color_4 = color_Selected;
-      color_2 = color_Unselected;
-      color_3 = color_Unselected;
-      color_1 = color_Unselected;
-      color_5 = color_Unselected;
-      color_6 = color_Unselected;
-      Provider.of<ProviderData>(context, listen: false)
-          .updateTruckPreference(newValue: 'Tanker');
+    color[cardNumber - 1] = selectedColor;
+    Provider.of<ProviderData>(context, listen: false)
+        .updateTruckPreference(newValue: cardValue);
     }
-    else if (cardNumber == 5 && color_5 == color_Unselected) {
-      color_5 = color_Selected;
-      color_2 = color_Unselected;
-      color_3 = color_Unselected;
-      color_4 = color_Unselected;
-      color_1 = color_Unselected;
-      color_6 = color_Unselected;
-      Provider.of<ProviderData>(context, listen: false)
-          .updateTruckPreference(newValue: 'Trailer');
-    }
-    else if (cardNumber == 6 && color_6 == color_Unselected) {
-      color_6 = color_Selected;
-      color_2 = color_Unselected;
-      color_3 = color_Unselected;
-      color_4 = color_Unselected;
-      color_5 = color_Unselected;
-      color_1 = color_Unselected;
-      Provider.of<ProviderData>(context, listen: false)
-          .updateTruckPreference(newValue: 'Truck');
-    }}
     @override
     Widget build(BuildContext context) {
       return AlertDialog(
@@ -102,8 +53,8 @@ class _TruckTypeWidgetScreenState extends State<TruckTypeWidgetScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        buildTruckCard(context: context,cardName: 'Container',cardImage: 'container',cardNumber: 1 ,cardColor: color_1),
-                        buildTruckCard(context: context,cardName: 'Hyva',cardImage: 'hyva',cardNumber: 2 ,cardColor: color_2),
+                        buildTruckCard(context: context,cardName: 'Container',cardImage: 'container',cardNumber: 1 ,cardColor: color[0],cardValue: "Container"),
+                        buildTruckCard(context: context,cardName: 'Hyva',cardImage: 'hyva',cardNumber: 2 ,cardColor: color[1],cardValue: "Hyva"),
                       ],
                     ),
                   ),
@@ -112,8 +63,8 @@ class _TruckTypeWidgetScreenState extends State<TruckTypeWidgetScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        buildTruckCard(context: context,cardName: 'LCV',cardImage: 'lcv',cardNumber: 3 ,cardColor: color_3),
-                        buildTruckCard(context: context,cardName: 'Tanker',cardImage: 'tanker',cardNumber: 4 ,cardColor: color_4),
+                        buildTruckCard(context: context,cardName: 'LCV',cardImage: 'lcv',cardNumber: 3 ,cardColor: color[2], cardValue: "LCV"),
+                        buildTruckCard(context: context,cardName: 'Tanker',cardImage: 'tanker',cardNumber: 4 ,cardColor: color[3],cardValue: "Tanker"),
 
                       ],
                     ),
@@ -123,8 +74,8 @@ class _TruckTypeWidgetScreenState extends State<TruckTypeWidgetScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        buildTruckCard(context: context,cardName: 'Trailer',cardImage: 'trailer',cardNumber: 5 ,cardColor: color_5),
-                        buildTruckCard(context: context,cardName: 'Truck',cardImage: 'truck',cardNumber: 6 ,cardColor: color_6),
+                        buildTruckCard(context: context,cardName: 'Trailer',cardImage: 'trailer',cardNumber: 5 ,cardColor: color[4],cardValue: "Trailer"),
+                        buildTruckCard(context: context,cardName: 'Truck',cardImage: 'truck',cardNumber: 6 ,cardColor: color[5], cardValue: "Truck"),
                       ],
                     ),
                   ),
@@ -134,12 +85,12 @@ class _TruckTypeWidgetScreenState extends State<TruckTypeWidgetScreen> {
       );
     }
 
-    GestureDetector buildTruckCard({BuildContext context, String cardName, String cardImage, int cardNumber, Color cardColor}) {
+    GestureDetector buildTruckCard({BuildContext context, String cardName, String cardImage, int cardNumber, Color cardColor, String cardValue}) {
       return GestureDetector(
                     onTap: () {
                       Navigator.pop(context);
                       setState(() {
-                        invertAllColour(cardNumber);
+                        invertAllColour(cardNumber, cardValue);
                       });
                     },
                     child: Container(

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
+// ignore: must_be_immutable
 class DropDownGenerator extends StatefulWidget {
-  String dropdownValue;
-  List<String> dropdownValues;
-  String notAllowedValue;
-  String dropDownNumber;
+  final String dropdownValue;
+  final List<String> dropdownValues;
+  final String notAllowedValue;
+  final String dropDownNumber;
   String hintText = ' ';
   DropDownGenerator(
       {this.dropdownValue,
@@ -29,16 +30,6 @@ class _DropDownGeneratorState extends State<DropDownGenerator> {
       iconDisabledColor: Colors.black54,
       elevation: 16,
       style: TextStyle(color: Colors.grey, fontSize: 18),
-      // onChanged: (String newValue) {
-      //   setState(() {
-      //     widget.dropdownValue = newValue;
-      //     if (widget.dropDownNumber == 'three') {
-      //       Provider.of<NewDataByShipper>(context, listen: false).updateNoOfTrucks(newValue: newValue);
-      //     } else if (widget.dropDownNumber == 'four') {
-      //       Provider.of<NewDataByShipper>(context, listen: false).updateWeight(newValue: newValue);
-      //     }
-      //   });
-      // },
       items:
       widget.dropdownValues.map<DropdownMenuItem<String>>((String value) {
         return DropdownMenuItem<String>(
@@ -51,23 +42,5 @@ class _DropDownGeneratorState extends State<DropDownGenerator> {
 }
 
 
-class DatePickerGenerator extends StatelessWidget {
-  final String date;
-  DatePickerGenerator({this.date});
-  @override
-  Widget build(BuildContext context) {
-    return DropdownButtonFormField<String>(
-      hint: Text(
-        '$date',
-        style: TextStyle(color: Colors.grey),
-      ),
-      icon: Icon(Icons.date_range_outlined),
-      iconDisabledColor: Colors.black54,
-      elevation: 16,
-      style: TextStyle(color: Colors.grey, fontSize: 18),
-      items: [],
-    );
-  }
-}
 
 

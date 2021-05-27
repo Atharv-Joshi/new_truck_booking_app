@@ -110,7 +110,7 @@ class DetailCard extends StatelessWidget {
                         height: 3,
                       ),
                       Text(
-                        'Upto $weight tons ',
+                        '$weight',
                         style: TextStyle(
                           fontSize: 18,
                         ),

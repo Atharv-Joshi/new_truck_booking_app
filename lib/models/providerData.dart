@@ -14,8 +14,6 @@ class ProviderData extends ChangeNotifier {
   GpsDataModel gpsData = new GpsDataModel();
   void updateGpsData(GpsDataModel newValue){
     gpsData = newValue;
-    print(gpsData);
-    print("reached Provider");
     notifyListeners();
   }
   void updateLoadingPoint({String newValue}) {
