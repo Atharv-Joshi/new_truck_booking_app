@@ -1,8 +1,6 @@
-import 'dart:async';
 import 'dart:ui';
 import 'package:Liveasy/getxcontrollers/timer_controller.dart';
 import 'package:Liveasy/screens/demo.dart';
-import 'package:Liveasy/screens/new_loading_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:pinput/pin_put/pin_put.dart';
@@ -12,8 +10,6 @@ import 'package:Liveasy/widgets/curves.dart';
 import 'package:Liveasy/widgets/card_template.dart';
 import 'package:Liveasy/getxcontrollers/getx_controllers.dart';
 import 'package:Liveasy/Services/auth_functions.dart';
-import 'package:provider/provider.dart';
-import 'package:Liveasy/providers/provider_data.dart';
 
 class NewOTPVerificationScreen extends StatefulWidget {
   static final routeName = '/otpverification';
@@ -60,8 +56,8 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
         progressIndicator: CircularProgressIndicator(
           valueColor: new AlwaysStoppedAnimation<Color>(Colors.black),
         ),
-        // inAsyncCall: showProgressHud,
-        inAsyncCall: hudController.hudController.value,
+        inAsyncCall: showProgressHud,
+        // inAsyncCall: hudController.hudController.value,
         child: SingleChildScrollView(
           child: Center(
             child: Stack(
@@ -122,6 +118,7 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
                                                 timerController.startTimer();
                                                 // hudController
                                                 //     .updateHudController(true);
+                                                showProgressHud = true;
                                               });
                                             },
                                   child: Text(
@@ -172,10 +169,12 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
                                   ),
                                   onPressed: () {
                                     // hudController.updateHudController(true);
+                                    setState(() {
+                                      showProgressHud = true;
+                                    });
                                     print(
                                         'hud true due to pressing of confirm button');
                                     timerController.cancelTimer();
-                                    // manualVerification(_smsCode);
                                     // authFunctions.manualVerification(_smsCode);
                                     manualVerification();
                                   },
@@ -216,6 +215,9 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
     timerController.startTimer();
     print('hud true due to initstate');
     // hudController.updateHudController(true);
+    setState(() {
+      showProgressHud = true;
+    });
 
     _verifyPhoneNumber();
     // authFunctions.verifyPhoneNumber(widget.phoneNumber);
@@ -236,7 +238,8 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
           timerController.cancelTimer();
           setState(() {
             print('hud false due to verificationCompleted');
-            // hudController.updateHudController(false);
+
+            showProgressHud = false;
           });
 
           Get.offAll(() => Demo());
@@ -245,6 +248,7 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
           setState(() {
             print('hud false due to verificationFailed');
             // hudController.updateHudController(false);
+            showProgressHud = false;
           });
           print(e.message);
         },
@@ -260,6 +264,7 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
               // closes the loading screen after 60 seconds in autoverfii doesnt work .. works fine.
               print('hud false due to codeAutoRetrievalTimeout');
               // hudController.updateHudController(false);
+              showProgressHud = false;
               _verificationCode = verificationId;
             });
           }
@@ -277,6 +282,7 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
           setState(() {
             print('hud false due to try in manual verification');
             // hudController.updateHudController(false);
+            showProgressHud = false;
           });
           Get.offAll(() => Demo());
         }
@@ -286,6 +292,7 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
       setState(() {
         print('hud false due to catch in manual verification');
         // hudController.updateHudController(false);
+        showProgressHud = false;
       });
       Get.snackbar('Invalid Otp', 'Please Enter the correct OTP',
           colorText: Colors.white, backgroundColor: Colors.black87);
