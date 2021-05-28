@@ -1,5 +1,7 @@
 import 'dart:ui';
+import 'package:Liveasy/getxcontrollers/hud_controller.dart';
 import 'package:Liveasy/getxcontrollers/timer_controller.dart';
+
 import 'package:Liveasy/screens/demo.dart';
 import 'package:flutter/material.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
@@ -10,6 +12,7 @@ import 'package:Liveasy/widgets/curves.dart';
 import 'package:Liveasy/widgets/card_template.dart';
 
 import 'package:Liveasy/Services/auth_functions.dart';
+import 'package:provider/provider.dart';
 
 class NewOTPVerificationScreen extends StatefulWidget {
   static final routeName = '/otpverification';
@@ -22,10 +25,11 @@ class NewOTPVerificationScreen extends StatefulWidget {
 }
 
 class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
+//--------------------------------------------------------------------------------------------------------------------
   AuthService authService = AuthService();
 
-  bool showProgressHud = false;
-  bool resendtimeout = false;
+  // bool showProgressHud = false;
+  // bool resendtimeout = false;
   final GlobalKey<ScaffoldState> _scaffoldkey = GlobalKey<ScaffoldState>();
   String _verificationCode = '';
   int _forceResendingToken;
@@ -51,184 +55,187 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
   Color resendButtonColor = Colors.grey;
   dynamic confirmButtonColor = MaterialStateProperty.all<Color>(Colors.grey);
   bool pinLengthCheck = false;
+
+  HudController hudController = Get.put(HudController());
+
+  //--------------------------------------------------------------------------------------------------------------------
+
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
-      key: _scaffoldkey,
-      body: ModalProgressHUD(
-        progressIndicator: CircularProgressIndicator(
-          valueColor: new AlwaysStoppedAnimation<Color>(Colors.black),
-        ),
-        inAsyncCall: showProgressHud,
-        // inAsyncCall: hudController.hudController.value,
-        child: SingleChildScrollView(
-          child: Center(
-            child: Stack(
-              children: [
-                OrangeCurve(),
-                GreenCurve(),
-                CardTemplate(
-                  child: Container(
-                    padding: EdgeInsets.fromLTRB(20, 50, 16, 0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          margin: EdgeInsets.fromLTRB(10, 0, 0, 10),
-                          child: Text(
-                            'Enter OTP',
-                            style: TextStyle(
-                              letterSpacing: 1,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 24,
-                              color: const Color(0xff000000),
-                            ),
-                          ),
-                        ),
-                        Container(
-                            margin: EdgeInsets.only(left: 10),
-                            child:
-                                Text('OTP send to +91${widget.phoneNumber}')),
-                        Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: PinPut(
-                            fieldsCount: 6,
-                            textStyle: const TextStyle(
-                                fontSize: 25.0, color: Colors.black),
-                            eachFieldWidth: 40.0,
-                            eachFieldHeight: 55.0,
-                            focusNode: _pinPutFocusNode,
-                            controller: _pinPutController,
-                            submittedFieldDecoration: pinPutDecoration,
-                            selectedFieldDecoration: pinPutDecoration,
-                            followingFieldDecoration: pinPutDecoration,
-                            pinAnimationType: PinAnimationType.fade,
-                            // onSubmit: (pin) async {
-                            //   _smsCode = pin;
-                            onChanged: (pin) async {
-                              if (pin.length == 6) {
-                                setState(() {
-                                  pinLengthCheck = true;
-                                  _smsCode = pin;
-                                  buttonColor =
-                                      MaterialStateProperty.all<Color>(
-                                          Color(0xff33364D));
-                                });
-                              } else {
-                                setState(() {
-                                  pinLengthCheck = false;
-                                  buttonColor =
-                                      MaterialStateProperty.all<Color>(
-                                          Colors.grey);
-                                });
-                              }
-                            },
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            Container(
-                              child: TextButton(
-                                  onPressed:
-                                      timerController.timeOnTimer.value > 0
-                                          ? null
-                                          : () {
-                                              setState(() {
-                                                resendButtonColor = Colors.grey;
-                                                timerController.startTimer();
-                                                // hudController
-                                                //     .updateHudController(true);
-                                                showProgressHud = true;
-                                              });
-                                            },
+        key: _scaffoldkey,
+        body: Obx(() => ModalProgressHUD(
+              progressIndicator: CircularProgressIndicator(
+                valueColor: new AlwaysStoppedAnimation<Color>(Colors.black),
+              ),
+              // inAsyncCall: showProgressHud,
+              inAsyncCall: hudController.showHud.value,
+              child: SingleChildScrollView(
+                child: Center(
+                  child: Stack(
+                    children: [
+                      OrangeCurve(),
+                      GreenCurve(),
+                      CardTemplate(
+                        child: Container(
+                          padding: EdgeInsets.fromLTRB(20, 50, 16, 0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                margin: EdgeInsets.fromLTRB(10, 0, 0, 10),
+                                child: Text(
+                                  'Enter OTP',
+                                  style: TextStyle(
+                                    letterSpacing: 1,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 24,
+                                    color: const Color(0xff000000),
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                  margin: EdgeInsets.only(left: 10),
                                   child: Text(
-                                    'Resend OTP',
-                                    style: TextStyle(
-                                      letterSpacing: 0.5,
-                                      color: resendButtonColor,
-                                      decoration: TextDecoration.underline,
-                                    ),
-                                  )),
-                            ),
-                            Container(
-                              margin: EdgeInsets.fromLTRB(20, 0, 0, 0),
-                              child: Row(
+                                      'OTP send to +91${widget.phoneNumber}')),
+                              Padding(
+                                padding: const EdgeInsets.all(10.0),
+                                child: PinPut(
+                                  fieldsCount: 6,
+                                  textStyle: const TextStyle(
+                                      fontSize: 25.0, color: Colors.black),
+                                  eachFieldWidth: 40.0,
+                                  eachFieldHeight: 55.0,
+                                  focusNode: _pinPutFocusNode,
+                                  controller: _pinPutController,
+                                  submittedFieldDecoration: pinPutDecoration,
+                                  selectedFieldDecoration: pinPutDecoration,
+                                  followingFieldDecoration: pinPutDecoration,
+                                  pinAnimationType: PinAnimationType.fade,
+                                  onChanged: (pin) async {
+                                    if (pin.length == 6) {
+                                      setState(() {
+                                        pinLengthCheck = true;
+                                        _smsCode = pin;
+                                        buttonColor =
+                                            MaterialStateProperty.all<Color>(
+                                                Color(0xff33364D));
+                                      });
+                                    } else {
+                                      setState(() {
+                                        pinLengthCheck = false;
+                                        buttonColor =
+                                            MaterialStateProperty.all<Color>(
+                                                Colors.grey);
+                                      });
+                                    }
+                                  },
+                                ),
+                              ),
+                              Row(
                                 children: [
-                                  Obx(
-                                    () => Text(
-                                      'Remaining time :  ${timerController.timeOnTimer}',
-                                      style: TextStyle(
-                                          color: const Color(0xff109E92)),
+                                  Container(
+                                    child: TextButton(
+                                        onPressed: timerController
+                                                    .timeOnTimer.value >
+                                                0
+                                            ? null
+                                            : () {
+                                                timerController.startTimer();
+                                                hudController.updateHud(true);
+                                                // setState(() {
+                                                //   resendButtonColor = Colors.grey;
+
+                                                //   // showProgressHud = true;
+                                                // });
+                                              },
+                                        child: Text(
+                                          'Resend OTP',
+                                          style: TextStyle(
+                                            letterSpacing: 0.5,
+                                            color: resendButtonColor,
+                                            decoration:
+                                                TextDecoration.underline,
+                                          ),
+                                        )),
+                                  ),
+                                  Container(
+                                    margin: EdgeInsets.fromLTRB(20, 0, 0, 0),
+                                    child: Row(
+                                      children: [
+                                        Obx(
+                                          () => Text(
+                                            'Remaining time :  ${timerController.timeOnTimer}',
+                                            style: TextStyle(
+                                                color: const Color(0xff109E92)),
+                                          ),
+                                        )
+                                      ],
                                     ),
                                   )
                                 ],
                               ),
-                            )
-                          ],
-                        ),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              width: MediaQuery.of(context).size.width * 0.70,
-                              height: 45,
-                              margin: EdgeInsets.fromLTRB(40, 20, 40, 0),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(50),
-                                child: ElevatedButton(
-                                    style: ButtonStyle(
-                                      backgroundColor: buttonColor,
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    width: MediaQuery.of(context).size.width *
+                                        0.70,
+                                    height: 45,
+                                    margin: EdgeInsets.fromLTRB(40, 20, 40, 0),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(50),
+                                      child: ElevatedButton(
+                                          style: ButtonStyle(
+                                            backgroundColor: buttonColor,
+                                          ),
+                                          child: Text(
+                                            'Confirm',
+                                            style: TextStyle(
+                                              color: const Color(0xffFFFFFF),
+                                            ),
+                                          ),
+                                          onPressed: pinLengthCheck
+                                              ? () {
+                                                  hudController.updateHud(true);
+                                                  print(
+                                                      'hud true due to pressing of confirm button');
+                                                  timerController.cancelTimer();
+                                                  authService.manualVerification(
+                                                      smsCode: _smsCode,
+                                                      verificationId:
+                                                          _verificationCode);       
+                                                }
+                                              : null),
                                     ),
-                                    child: Text(
-                                      'Confirm',
-                                      style: TextStyle(
-                                        color: const Color(0xffFFFFFF),
+                                  ),
+                                  Container(
+                                    child: TextButton(
+                                      onPressed: () {
+                                        Get.back();
+                                      },
+                                      child: Text(
+                                        'Want to change number',
+                                        style: TextStyle(
+                                          color: const Color(0xff109E92),
+                                          decoration: TextDecoration.underline,
+                                        ),
                                       ),
                                     ),
-                                    onPressed: pinLengthCheck
-                                        ? () {
-                                            // hudController.updateHudController(true);
-                                            // setState(() {
-                                            //   showProgressHud = true;
-                                            // });
-                                            print(
-                                                'hud true due to pressing of confirm button');
-                                            timerController.cancelTimer();
-                                            authService.manualVerification(
-                                                smsCode: _smsCode,
-                                                verificationId:
-                                                    _verificationCode);
-                                            // manualVerification();
-                                          }
-                                        : null),
+                                  )
+                                ],
                               ),
-                            ),
-                            Container(
-                              child: TextButton(
-                                onPressed: () {
-                                  Get.back();
-                                },
-                                child: Text(
-                                  'Want to change number',
-                                  style: TextStyle(
-                                    color: const Color(0xff109E92),
-                                    decoration: TextDecoration.underline,
-                                  ),
-                                ),
-                              ),
-                            )
-                          ],
+                            ],
+                          ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+              ),
+            )) // obx,
+        );
   }
 
   @override
@@ -236,16 +243,15 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
     super.initState();
     timerController.startTimer();
     print('hud true due to initstate');
-    // hudController.updateHudController(true);
-    setState(() {
-      showProgressHud = true;
-    });
 
-    _verifyPhoneNumber();
+    hudController.updateHud(true);
+
+    _verifyPhoneNumber(context);
     // authFunctions.verifyPhoneNumber(widget.phoneNumber);
   }
 
-  _verifyPhoneNumber() async {
+  _verifyPhoneNumber(BuildContext context) async {
+    
     try {
       await FirebaseAuth.instance.verifyPhoneNumber(
           //this value changes runtime
@@ -259,21 +265,21 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
               print(user.uid);
             }
             timerController.cancelTimer();
-            setState(() {
-              print('hud false due to verificationCompleted');
-              showProgressHud = false;
-            });
+
+            print('hud false due to verificationCompleted');
+            hudController.updateHud(false);
+
             Get.offAll(() => Demo());
           },
           verificationFailed: (FirebaseAuthException e) {
-            setState(() {
-              print('hud false due to verificationFailed');
-              // hudController.updateHudController(false);
-              showProgressHud = false;
-            });
+            // setState(() {
+            print('hud false due to verificationFailed');
+            // hudController.updateHudController(false);
+            hudController.updateHud(false);
+            // });
             print(e.message);
           },
-          codeSent: (String verficationId, int resendToken) {
+          codeSent: (String verficationId, int resendToken) { 
             setState(() {
               _forceResendingToken = resendToken;
               _verificationCode = verficationId;
@@ -281,20 +287,16 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
           },
           codeAutoRetrievalTimeout: (String verificationId) {
             if (mounted) {
+              hudController.updateHud(false);
+              timerController.cancelTimer();
               setState(() {
-                // closes the loading screen after 60 seconds in autoverfii doesnt work .. works fine.
-                print('hud false due to codeAutoRetrievalTimeout');
-                // hudController.updateHudController(false);
-                showProgressHud = false;
                 _verificationCode = verificationId;
               });
             }
           },
           timeout: Duration(seconds: 60));
     } catch (e) {
-      setState(() {
-        showProgressHud = false;
-      });
+      hudController.updateHud(false);
     }
   }
 } // class end
