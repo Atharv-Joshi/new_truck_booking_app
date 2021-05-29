@@ -1,8 +1,9 @@
 
+import 'package:Liveasy/providers/auth_provider.dart';
+import 'package:Liveasy/providers/providerdata.dart';
 import 'package:Liveasy/screens/demo.dart';
 import 'package:Liveasy/screens/new_login_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:Liveasy/screens/new_loading_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -26,14 +27,13 @@ class FlashChat extends StatelessWidget {
           FocusManager.instance.primaryFocus.unfocus();
         }        
       },
-      child: GetMaterialApp(
+      child: ChangeNotifierProvider<ProviderData>(
+        create: (context) => ProviderData(),
+        child: GetMaterialApp(
         theme: ThemeData(),
-        initialRoute: NewLoginScreen.routeName,
-        routes: {
-          Demo.routeName: (ctx) => Demo(),
-          NewLoginScreen.routeName: (ctx) => NewLoginScreen(),
-          NewLoadingScreen.routeName: (ctx) => NewLoadingScreen()
-        },
+        home: NewLoginScreen(),
+
+        ),
       ),
     );
   }

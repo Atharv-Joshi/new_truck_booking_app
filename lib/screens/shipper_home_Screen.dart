@@ -16,7 +16,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:Liveasy/screens/cardGenerator.dart';
 import 'package:provider/provider.dart';
 import 'package:Liveasy/widgets/weight_modal_screen.dart';
-import 'package:Liveasy/widgets/noOfTrucks_modal_screen.dart';
+// import 'package:Liveasy/widgets/noOfTrucks_modal_screen.dart';
 import 'package:Liveasy/widgets/providerData.dart';
 import 'package:Liveasy/widgets/dropDownGenerator.dart';
 import 'package:Liveasy/widgets/product_type_modal_screen.dart';
@@ -597,7 +597,7 @@ class _ShipperHomeScreenState extends State<ShipperHomeScreen> {
                                               child: GestureDetector(
                                                 onTap: () {
                                                   FocusScope.of(context).unfocus();
-                                                  showDialog(context: context, builder: (context)=> NoOfTrucksWidgetScreen());
+                                                  // showDialog(context: context, builder: (context)=> NoOfTrucksWidgetScreen());
                                                 },
                                                 child: Container(
                                                   height: 72,

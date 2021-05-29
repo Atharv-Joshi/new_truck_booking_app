@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'package:Liveasy/getxcontrollers/hud_controller.dart';
 import 'package:Liveasy/getxcontrollers/timer_controller.dart';
-
+import 'package:Liveasy/providers/providerdata.dart';
 import 'package:Liveasy/screens/demo.dart';
 import 'package:flutter/material.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
@@ -10,9 +10,9 @@ import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:Liveasy/widgets/curves.dart';
 import 'package:Liveasy/widgets/card_template.dart';
-
 import 'package:Liveasy/Services/auth_functions.dart';
 import 'package:provider/provider.dart';
+
 
 class NewOTPVerificationScreen extends StatefulWidget {
   static final routeName = '/otpverification';
@@ -28,15 +28,14 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
 //--------------------------------------------------------------------------------------------------------------------
   AuthService authService = AuthService();
 
-  // bool showProgressHud = false;
-  // bool resendtimeout = false;
+
   final GlobalKey<ScaffoldState> _scaffoldkey = GlobalKey<ScaffoldState>();
   String _verificationCode = '';
   int _forceResendingToken;
-  String _smsCode = '';
   final TextEditingController _pinPutController = TextEditingController();
   final FocusNode _pinPutFocusNode = FocusNode();
 
+  //this will be put as a const decoration
   final BoxDecoration pinPutDecoration = BoxDecoration(
     boxShadow: [
       BoxShadow(
@@ -49,12 +48,12 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
     ),
   );
 
-  dynamic buttonColor = MaterialStateProperty.all<Color>(Colors.grey);
+
 
   TimerController timerController = Get.put(TimerController());
   Color resendButtonColor = Colors.grey;
-  dynamic confirmButtonColor = MaterialStateProperty.all<Color>(Colors.grey);
-  bool pinLengthCheck = false;
+
+
 
   HudController hudController = Get.put(HudController());
 
@@ -62,14 +61,13 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
 
   @override
   Widget build(BuildContext context) {
-
+    ProviderData providerData = Provider.of<ProviderData>(context);
     return Scaffold(
         key: _scaffoldkey,
         body: Obx(() => ModalProgressHUD(
               progressIndicator: CircularProgressIndicator(
                 valueColor: new AlwaysStoppedAnimation<Color>(Colors.black),
               ),
-              // inAsyncCall: showProgressHud,
               inAsyncCall: hudController.showHud.value,
               child: SingleChildScrollView(
                 child: Center(
@@ -115,20 +113,12 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
                                   pinAnimationType: PinAnimationType.fade,
                                   onChanged: (pin) async {
                                     if (pin.length == 6) {
-                                      setState(() {
-                                        pinLengthCheck = true;
-                                        _smsCode = pin;
-                                        buttonColor =
-                                            MaterialStateProperty.all<Color>(
-                                                Color(0xff33364D));
-                                      });
+                                      providerData.updateInputControllerLengthCheck(true);
+                                      providerData.updateButtonColor(MaterialStateProperty.all<Color>(Color(0xff33364D)));
+                                      providerData.updateSmsCode(pin);
                                     } else {
-                                      setState(() {
-                                        pinLengthCheck = false;
-                                        buttonColor =
-                                            MaterialStateProperty.all<Color>(
-                                                Colors.grey);
-                                      });
+                                      providerData.updateInputControllerLengthCheck(false);
+                                      providerData.updateButtonColor(MaterialStateProperty.all<Color>(Colors.grey));
                                     }
                                   },
                                 ),
@@ -144,11 +134,6 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
                                             : () {
                                                 timerController.startTimer();
                                                 hudController.updateHud(true);
-                                                // setState(() {
-                                                //   resendButtonColor = Colors.grey;
-
-                                                //   // showProgressHud = true;
-                                                // });
                                               },
                                         child: Text(
                                           'Resend OTP',
@@ -188,7 +173,7 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
                                       borderRadius: BorderRadius.circular(50),
                                       child: ElevatedButton(
                                           style: ButtonStyle(
-                                            backgroundColor: buttonColor,
+                                            backgroundColor: providerData.buttonColor,
                                           ),
                                           child: Text(
                                             'Confirm',
@@ -196,18 +181,18 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
                                               color: const Color(0xffFFFFFF),
                                             ),
                                           ),
-                                          onPressed: pinLengthCheck
+                                          onPressed: providerData.inputControllerLengthCheck
                                               ? () {
                                                   hudController.updateHud(true);
-                                                  print(
-                                                      'hud true due to pressing of confirm button');
                                                   timerController.cancelTimer();
                                                   authService.manualVerification(
-                                                      smsCode: _smsCode,
+                                                      smsCode: providerData.smsCode,
                                                       verificationId:
-                                                          _verificationCode);       
+                                                          _verificationCode);
+                                                  providerData.clearall();
                                                 }
-                                              : null),
+                                              : null
+                                      ),
                                     ),
                                   ),
                                   Container(
@@ -240,18 +225,15 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
 
   @override
   void initState() {
+
     super.initState();
     timerController.startTimer();
-    print('hud true due to initstate');
-
     hudController.updateHud(true);
+    _verifyPhoneNumber();
 
-    _verifyPhoneNumber(context);
-    // authFunctions.verifyPhoneNumber(widget.phoneNumber);
   }
 
-  _verifyPhoneNumber(BuildContext context) async {
-    
+  void _verifyPhoneNumber() async {
     try {
       await FirebaseAuth.instance.verifyPhoneNumber(
           //this value changes runtime
@@ -265,24 +247,18 @@ class _NewOTPVerificationScreenState extends State<NewOTPVerificationScreen> {
               print(user.uid);
             }
             timerController.cancelTimer();
-
-            print('hud false due to verificationCompleted');
             hudController.updateHud(false);
 
             Get.offAll(() => Demo());
           },
           verificationFailed: (FirebaseAuthException e) {
-            // setState(() {
-            print('hud false due to verificationFailed');
-            // hudController.updateHudController(false);
             hudController.updateHud(false);
-            // });
             print(e.message);
           },
-          codeSent: (String verficationId, int resendToken) { 
+          codeSent: (String verificationId, int resendToken) {
             setState(() {
               _forceResendingToken = resendToken;
-              _verificationCode = verficationId;
+              _verificationCode = verificationId;
             });
           },
           codeAutoRetrievalTimeout: (String verificationId) {
